@@ -1,4 +1,4 @@
-MHD-3dmlw
+cofortran
 =========
 
-3D MHD code of modified lax-wendroff scheme with co-array fortran
+2D-MHD code for parallel calculation with co-array fortran
