@@ -10,7 +10,7 @@ subroutine step(box)
     type(cell) :: box
     type(cell), pointer :: fx, fy, fz, s, h, d
     integer :: i
-    allocate(fx, fz, s, h, d)
+    allocate(fx, fy, fz, s, h, d)
     fx = box
     fy = box
     fz = box

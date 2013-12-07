@@ -42,7 +42,7 @@ program main
     t = 0.
     tint = 1.
     tnxt = tint
-    tend = 80.
+    tend = 1.
     ns = 0
     nsout = 1e5
 

@@ -12,10 +12,11 @@ subroutine outp(box,t)
     write(box%op%mf_ro) box%ro
     write(box%op%mf_pr) box%pr
     write(box%op%mf_vx) box%rovx/box%ro
-    write(box%op%mf_vy) box%rovz/box%ro
+    write(box%op%mf_vy) box%rovy/box%ro
+    write(box%op%mf_vz) box%rovz/box%ro
     write(box%op%mf_bx) box%bx
-    write(box%op%mf_by) box%bz
-    write(box%op%mf_az) box%bpot
+    write(box%op%mf_by) box%by
+    write(box%op%mf_bz) box%bz
 
 end subroutine 
 
@@ -38,23 +39,24 @@ subroutine outpinit(box)
     box%op%mf_pr=21
     box%op%mf_vx=22
     box%op%mf_vy=23
+    box%op%mf_vz=24
     box%op%mf_bx=25
     box%op%mf_by=26
-    box%op%mf_az=28
+    box%op%mf_bz=27
     
     call dacdefparam(box%op%mf_params,'params.txt.'//cno)
     call dacdef0s(box%op%mf_t,'t.dac.'//cno,6)
-    call dacdef2s(box%op%mf_ro,'ro.dac.'//cno,6,box%con%ix,box%con%iz)
-    call dacdef2s(box%op%mf_pr,'pr.dac.'//cno,6,box%con%ix,box%con%iz)
-    call dacdef2s(box%op%mf_vx,'vx.dac.'//cno,6,box%con%ix,box%con%iz)
-    call dacdef2s(box%op%mf_vy,'vy.dac.'//cno,6,box%con%ix,box%con%iz)
-    call dacdef2s(box%op%mf_bx,'bx.dac.'//cno,6,box%con%ix,box%con%iz)
-    call dacdef2s(box%op%mf_by,'by.dac.'//cno,6,box%con%ix,box%con%iz)
-    call dacdef2s(box%op%mf_az,'az.dac.'//cno,6,box%con%ix,box%con%iz)
+    call dacdef2s(box%op%mf_ro,'ro.dac.'//cno,6,ix,iz)
+    call dacdef2s(box%op%mf_pr,'pr.dac.'//cno,6,ix,iz)
+    call dacdef2s(box%op%mf_vx,'vx.dac.'//cno,6,ix,iz)
+    call dacdef2s(box%op%mf_vy,'vy.dac.'//cno,6,ix,iz)
+    call dacdef2s(box%op%mf_vz,'vz.dac.'//cno,6,ix,iz)
+    call dacdef2s(box%op%mf_bx,'bx.dac.'//cno,6,ix,iz)
+    call dacdef2s(box%op%mf_by,'by.dac.'//cno,6,ix,iz)
 
-    call dacputparami(box%op%mf_params,'ix',box%con%ix)
-    call dacputparami(box%op%mf_params,'jx',box%con%iz)
-    call dacputparami(box%op%mf_params,'margin',box%con%marg)
+    call dacputparami(box%op%mf_params,'ix',ix)
+    call dacputparami(box%op%mf_params,'jx',iz)
+    call dacputparami(box%op%mf_params,'margin',marg)
     call dacputparami(box%op%mf_params,'mpi',1)
     call dacputparami(box%op%mf_params,'mpex',cox*coz)
     call dacputparami(box%op%mf_params,'mpe',mpe)
@@ -64,9 +66,9 @@ subroutine outpinit(box)
     call dacputparami(box%op%mf_params,'jpe',box%con%imz-1)
     
 
-    call dacdef1d(box%op%mf_x,'x.dac.'//cno,6,box%con%ix)
+    call dacdef1d(box%op%mf_x,'x.dac.'//cno,6,ix)
     write(box%op%mf_x) box%x
-    call dacdef1d(box%op%mf_y,'y.dac.'//cno,6,box%con%iz)
+    call dacdef1d(box%op%mf_y,'y.dac.'//cno,6,iz)
     write(box%op%mf_y) box%z
     call dacputparamd(box%op%mf_params,'gm',box%con%gam)
 
@@ -96,32 +98,36 @@ subroutine readdata(box,t)
     box%op%mfi_pr=71
     box%op%mfi_vx=72
     box%op%mfi_vy=73
-    box%op%mfi_bx=74
-    box%op%mfi_by=75
-    box%op%mfi_az=76
+    box%op%mfi_vz=74
+    box%op%mfi_bx=75
+    box%op%mfi_by=76
+    box%op%mfi_by=77
     
     call dacopnr0s(box%op%mfi_t,'in/t.dac.'//cno,mtype,nx0)
     call dacopnr2s(box%op%mfi_ro,'in/ro.dac.'//cno,mtype,ix0,jx0,nx0)
     call dacopnr2s(box%op%mfi_pr,'in/pr.dac.'//cno,mtype,ix0,jx0,nx0)
     call dacopnr2s(box%op%mfi_vx,'in/vx.dac.'//cno,mtype,ix0,jx0,nx0)
     call dacopnr2s(box%op%mfi_vy,'in/vy.dac.'//cno,mtype,ix0,jx0,nx0)
+    call dacopnr2s(box%op%mfi_vz,'in/vz.dac.'//cno,mtype,ix0,jx0,nx0)
     call dacopnr2s(box%op%mfi_bx,'in/bx.dac.'//cno,mtype,ix0,jx0,nx0)
     call dacopnr2s(box%op%mfi_by,'in/by.dac.'//cno,mtype,ix0,jx0,nx0)
-    call dacopnr2s(box%op%mfi_az,'in/az.dac.'//cno,mtype,ix0,jx0,nx0)
+    call dacopnr2s(box%op%mfi_bz,'in/bz.dac.'//cno,mtype,ix0,jx0,nx0)
 
     do n=1,ndi
         read(box%op%mfi_t,end=9900) t
         read(box%op%mfi_ro) box%ro
         read(box%op%mfi_pr) box%pr
         read(box%op%mfi_vx) box%rovx
-        read(box%op%mfi_vy) box%rovz
+        read(box%op%mfi_vy) box%rovy
+        read(box%op%mfi_vz) box%rovz
         read(box%op%mfi_bx) box%bx
-        read(box%op%mfi_by) box%bz
-        read(box%op%mfi_az) box%bpot
+        read(box%op%mfi_by) box%by
+        read(box%op%mfi_bz) box%bz
     end do
 9900  continue
     
     box%rovx = box%rovx*box%ro
+    box%rovy = box%rovy*box%ro
     box%rovz = box%rovz*box%ro
     box%e = 0.5*(box%rovx**2 + box%rovy**2 + box%rovz**2)/box%ro &
             + box%pr/(box%con%gam-1.) &

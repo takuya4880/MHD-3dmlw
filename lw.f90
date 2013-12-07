@@ -53,16 +53,16 @@ subroutine each1(u,h,d,fx,fy,fz,s,dx,dy,dz,dt)
     !$omp parallel do private(i,j,fffx,fffy,fffz,ss) 
     do k=1,iz-1
      do j=1,iy-1
-      do i=1:ix-1
+      do i=1,ix-1
           fffx = 0.25* ( fx(i+1,j+1,k+1)+fx(i+1,j,k+1)-fx(i,j+1,k+1)-fx(i,j,k+1) &
                         +fx(i+1,j+1,k  )+fx(i+1,j,k  )-fx(i,j+1,k  )-fx(i,j,k  ) )
           fffy = 0.25* ( fy(i+1,j+1,k+1)-fy(i+1,j,k+1)+fy(i,j+1,k+1)-fy(i,j,k+1) &
                         +fy(i+1,j+1,k  )-fy(i+1,j,k  )+fy(i,j+1,k  )-fy(i,j,k  ) )
-          fffy = 0.25* ( fz(i+1,j+1,k+1)+fz(i+1,j,k+1)+fz(i,j+1,k+1)+fz(i,j,k+1) &
+          fffz = 0.25* ( fz(i+1,j+1,k+1)+fz(i+1,j,k+1)+fz(i,j+1,k+1)+fz(i,j,k+1) &
                         -fz(i+1,j+1,k  )-fz(i+1,j,k  )-fz(i,j+1,k  )-fz(i,j,k  ) )
           ss   = 0.125* ( s(i+1,j+1,k+1)+ s(i+1,j,k+1)+ s(i,j+1,k+1)+ s(i,j,k+1) &
                         + s(i+1,j+1,k  )+ s(i+1,j,k  )+ s(i,j+1,k  )+ s(i,j,k  ) )
-          h(j,i)= 0.125* (u(i+1,j+1,k+1)+ u(i+1,j,k+1)+ u(i,j+1,k+1)+ u(i,j,k+1) &
+          h(i,j,k)=0.125*(u(i+1,j+1,k+1)+ u(i+1,j,k+1)+ u(i,j+1,k+1)+ u(i,j,k+1) &
                         + u(i+1,j+1,k  )+ u(i+1,j,k  )+ u(i,j+1,k  )+ u(i,j,k  ) )&
                         - (ddx*fffx + ddy*fffy + ddz*fffz - dt*ss)
       end do
@@ -80,7 +80,7 @@ subroutine lw2(box, d, fx, fy, fz, s)
     dx = box%con%dx
     dy = box%con%dy
     dz = box%con%dz
-    dt  = box%con%dt
+    dt = box%con%dt
 
     call each2(box%ro,d%ro,fx%ro,fy%ro,fz%ro,s%ro,dx,dy,dz,dt)
     call each2(box%rovx,d%rovx,fx%rovx,fy%rovx,fz%rovx,s%rovx,dx,dy,dz,dt)
@@ -89,7 +89,7 @@ subroutine lw2(box, d, fx, fy, fz, s)
     call each2(box%bx,d%bx,fx%bx,fy%bx,fz%bx,s%bx,dx,dy,dz,dt)
     call each2(box%by,d%by,fx%by,fy%by,fz%by,s%by,dx,dy,dz,dt)
     call each2(box%bz,d%bz,fx%bz,fy%bz,fz%bz,s%bz,dx,dy,dz,dt)
-    call each2(box%e,d%e,fx%e,fz%e,s%e,dx,dy,dz,dt)
+    call each2(box%e,d%e,fx%e,fy%e,fz%e,s%e,dx,dy,dz,dt)
 
 end subroutine
 
@@ -98,7 +98,7 @@ subroutine each2(box,d,fx,fy,fz,s,dx,dy,dz,dt)
     !$use omp_lib
     implicit none
     double precision :: box(ix,iy,iz),d(ix,iy,iz)
-    double precision :: fx(ix,iy,iz),fz(ix,iy,iz),s(ix,iy,iz)
+    double precision :: fx(ix,iy,iz),fy(ix,iy,iz),fz(ix,iy,iz),s(ix,iy,iz)
     double precision :: dx, dy, dz, dt
     
     integer i,j,k
@@ -117,11 +117,11 @@ subroutine each2(box,d,fx,fy,fz,s,dx,dy,dz,dt)
                         +fx(i+1,j+1,k  )+fx(i+1,j,k  )-fx(i,j+1,k  )-fx(i,j,k  ) )
           fffy = 0.25* ( fy(i+1,j+1,k+1)-fy(i+1,j,k+1)+fy(i,j+1,k+1)-fy(i,j,k+1) &
                         +fy(i+1,j+1,k  )-fy(i+1,j,k  )+fy(i,j+1,k  )-fy(i,j,k  ) )
-          fffy = 0.25* ( fz(i+1,j+1,k+1)+fz(i+1,j,k+1)+fz(i,j+1,k+1)+fz(i,j,k+1) &
+          fffz = 0.25* ( fz(i+1,j+1,k+1)+fz(i+1,j,k+1)+fz(i,j+1,k+1)+fz(i,j,k+1) &
                         -fz(i+1,j+1,k  )-fz(i+1,j,k  )-fz(i,j+1,k  )-fz(i,j,k  ) )
           ss   = 0.125* ( s(i+1,j+1,k+1)+ s(i+1,j,k+1)+ s(i,j+1,k+1)+ s(i,j,k+1) &
                         + s(i+1,j+1,k  )+ s(i+1,j,k  )+ s(i,j+1,k  )+ s(i,j,k  ) )
-          d(j+1,i+1) = d(j+1,i+1) - 0.5*(ddx*fffx + ddy*fffy + ddz*fffz - dt*ss)
+          d(i+1,j+1,k+1) = d(i+1,j+1,k+1) - 0.5*(ddx*fffx + ddy*fffy + ddz*fffz - dt*ss)
       end do
      end do
     end do
@@ -216,7 +216,7 @@ subroutine flux(box, fx, fy, fz)
             bz = box%bz(i,j,k)
             pr = box%pr(i,j,k)
             b2 = bx**2 + by**2 + bz**2
-            h = 0.5*(vx**2+vy**2+vz**2)*box%ro(i,j) &
+            h = 0.5*(vx**2+vy**2+vz**2)*box%ro(i,j,k) &
                         + pr*box%con%gam/(box%con%gam-1.)
 
             jx = (box%bz(i,j+1,k)-box%bz(i,j-1,k))/(2.*box%con%dy) &
@@ -267,6 +267,7 @@ subroutine flux(box, fx, fy, fz)
             fz%bz(i,j,k) = 0.
             fz%e(i,j,k) = h*vz + (ex*by - ey*bx)
         end do
+      end do
     end do
     !$omp end parallel do 
     
