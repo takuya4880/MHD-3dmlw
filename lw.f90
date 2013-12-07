@@ -183,13 +183,13 @@ subroutine eachav(box,d,kapx,kapy,kapz,con)
     box(3:ix-2,3:iy-2,3:iz-2) = box(3:ix-2,3:iy-2,3:iz-2) + d(3:ix-2,3:iy-2,3:iz-2) &
              + ddx * ( kapx(4:ix-1,3:iy-2,3:iz-2)*difx(4:ix-1,3:iy-2,3:iz-2) &
                      - kapx(3:ix-2,3:iy-2,3:iz-2)*difx(3:ix-2,3:iy-2,3:iz-2) ) &
-             + ddy * ( kapx(3:ix-2,4:iy-1,3:iz-2)*difx(3:ix-2,4:iy-1,3:iz-2) &
-                     - kapx(3:ix-2,3:iy-2,3:iz-2)*difx(3:ix-2,3:iy-2,3:iz-2) ) &
+             + ddy * ( kapy(3:ix-2,4:iy-1,3:iz-2)*dify(3:ix-2,4:iy-1,3:iz-2) &
+                     - kapy(3:ix-2,3:iy-2,3:iz-2)*dify(3:ix-2,3:iy-2,3:iz-2) ) &
              + ddz * ( kapz(3:ix-2,3:iy-2,4:iz-1)*difz(3:ix-2,3:iy-2,4:iz-1) &
                      - kapz(3:ix-2,3:iy-2,3:iz-2)*difz(3:ix-2,3:iy-2,3:iz-2) ) 
     !$omp end workshare
     !$omp end parallel 
-    deallocate(difx,difz)
+    deallocate(difx,dify,difz)
 end subroutine 
 
 subroutine flux(box, fx, fy, fz)
