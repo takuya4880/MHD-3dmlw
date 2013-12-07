@@ -298,7 +298,7 @@ subroutine source(box, s)
     s%bz = 0.
     s%rovx = box%ro*box%con%gx
     s%rovy = box%ro*box%con%gy
-    s%rovz = box%ro*box%con%gz*spread(spread(fugou,1,ix)2,iy)
+    forall(i=1:iz) s%rovz(:,:,i) = box%ro(:,:,i)*box%con%gz*fugou(i)
     s%e = box%rovx*box%con%gx + box%rovy*box%con%gy + box%rovz*box%con%gz
 
     !$omp end parallel workshare

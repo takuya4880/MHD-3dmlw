@@ -90,7 +90,7 @@ subroutine initial(box, uboundary)
     head = nz*(box%con%imz-1) + 1 
     tail = head + iz - 1
 
-    box%ro = spread(spread(den(head:tail),1,ix),2,iy)
+    forall(i=head:tail) box%ro(:,:,i) = den(i)
     box%rovx = 0.
     box%rovy = 0.
     box%rovz = 0.
@@ -104,10 +104,10 @@ subroutine initial(box, uboundary)
         end do
     end do
 
-    box%bx = spread(spread(b(head:tail)*cos(phi(head:tail)),1,ix),2,iy)
+    forall(i=head:tail) box%bx(:,:,i) = b(i)*cos(phi(i))
     box%by = 0.
-    box%bz = spread(spread(b(head:tail)*sin(phi(head:tail)),1,ix),2,iy)
-    box%pr = spread(spread(pre(head:tail),1,ix),2,iy) 
+    forall(i=head:tail) box%bz(:,:,i) = b(i)*sin(phi(i))
+    forall(i=head:tail) box%pr(:,:,i) = pre(i) 
     box%e = 0.5*(box%rovx**2 + box%rovy**2 + box%rovz**2)/box%ro &
             + box%pr/(box%con%gam-1.) &
             + 0.5*(box%bx**2 + box%by**2 + box%bz**2)
