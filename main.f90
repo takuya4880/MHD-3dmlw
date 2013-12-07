@@ -49,12 +49,12 @@ program main
     call initial(box, uboundary)
     sync all
     call boundary(box, uboundary)
-    call outpinit(box)
-    if (mcont==1) then
-        call readdata(box,t)
-        tnxt = dint(t) + tint
-    end if
-    call outp(box,t)
+    !call outpinit(box)
+    !if (mcont==1) then
+    !    call readdata(box,t)
+    !    tnxt = dint(t) + tint
+    !end if
+    !call outp(box,t)
     call pressure(box)
 
     do
@@ -66,7 +66,7 @@ program main
         ns = ns + 1
         if (box%con%imx*box%con%imy*box%con%imz==1) print *,t,box%con%dt 
         if (t>=tnxt .or. ns>=nsout) then
-            call outp(box,t)
+            !call outp(box,t)
             tnxt = tnxt + tint
             ns = 0
         endif
