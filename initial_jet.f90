@@ -4,7 +4,7 @@ contains
 subroutine initial(box, uboundary)
     use defstruct
     implicit none
-    type(cell) :: box[cox,coz,*]
+    type(cell) :: box[cox,coy,coz,*]
     double precision :: uboundary(9,marg)
 
     integer :: i,j,m,origin
@@ -16,7 +16,7 @@ subroutine initial(box, uboundary)
     double precision :: den(iiz), pre(iiz),temp(iiz),phi(iiz)
     double precision :: beta(iiz),beta1i(iiz),beta2i(iiz),b(iiz),ee(iiz) 
     double precision :: zz(iiz)
-    m = box%con%marg
+    m = marg
     wid = box%con%wid
     gami = 1./box%con%gam
 
@@ -40,6 +40,7 @@ subroutine initial(box, uboundary)
     origin = int(5./box%con%hig*nnz)+1+m
     
     forall(i=1:ix) box%x(i)=box%con%dx*(nx*(box%con%imx-1)+i-m)
+    forall(i=1:iy) box%y(i)=box%con%dy*(ny*(box%con%imy-1)+i-m)
     forall(i=1:iz) box%z(i)=box%con%dz*(nz*(box%con%imz-1)+i-origin)
     forall(i=1:iiz) zz(i)=box%con%dz*(i-origin)
     
@@ -89,7 +90,7 @@ subroutine initial(box, uboundary)
     head = nz*(box%con%imz-1) + 1 
     tail = head + iz - 1
 
-    box%ro = spread(den(head:tail),1,ix)
+    box%ro = spread(spread(den(head:tail),1,ix),2,iy)
     box%rovx = 0.
     box%rovy = 0.
     box%rovz = 0.
@@ -98,57 +99,27 @@ subroutine initial(box, uboundary)
             x = box%x(i)
             z = box%z(j)
             if (z>zfsl .and. z<zfsu .and. x>0.5*wid-0.25*lp .and. x<0.5*wid+0.25*lp) then
-                box%rovz(i,j) = box%ro(i,j)*amp*cos(8.*atan(1.d0)*(x-0.5*wid)/lp)
+                box%rovz(i,j,:) = box%ro(i,j,:)*amp*cos(8.*atan(1.d0)*(x-0.5*wid)/lp)
             end if
         end do
     end do
 
-    box%bx = spread(b(head:tail)*cos(phi(head:tail)),1,ix)
+    box%bx = spread(spread(b(head:tail)*cos(phi(head:tail)),1,ix),2,iy)
     box%by = 0.
-    box%bz = spread(b(head:tail)*sin(phi(head:tail)),1,ix)
-    box%pr = spread(pre(head:tail),1,ix)  
+    box%bz = spread(spread(b(head:tail)*sin(phi(head:tail)),1,ix),2,iy)
+    box%pr = spread(spread(pre(head:tail),1,ix),2,iy) 
     box%e = 0.5*(box%rovx**2 + box%rovy**2 + box%rovz**2)/box%ro &
             + box%pr/(box%con%gam-1.) &
             + 0.5*(box%bx**2 + box%by**2 + box%bz**2)
 
-    box%bpot(:,1:marg)=0.
-    if(box%con%imz==1) then
-        do j=marg+1,iz
-            box%bpot(:,j) = box%bpot(:,j-1) &
-                            + 0.5*box%con%dz*(box%bx(:,j)+box%bx(:,j-1))
-        end do
-    end if
-    sync all
-    do i=2,coz
-        if (box%con%imz==i) then
-            box%bpot(:,1) = box[box%con%imx,i-1,1]%bpot(:,iz-2*marg+1)
-            do j=2,iz
-                box%bpot(:,j) = box%bpot(:,j-1) &
-                                + 0.5*box%con%dz*(box%bx(:,j)+box%bx(:,j-1))
-            end do
-        end if
-        sync all
-    end do
-           
-
-    !uboundary(1,1:marg) = den(iz-marg+1:iz)
-    !uboundary(2,1:marg) = box%rovx(100,iz-marg+1:iz)
-    !uboundary(3,1:marg) = box%rovy(100,iz-marg+1:iz)
-    !uboundary(4,1:marg) = box%rovz(100,iz-marg+1:iz)
-    !uboundary(5,1:marg) = box%bx(100,iz-marg+1:iz)
-    !uboundary(6,1:marg) = box%by(100,iz-marg+1:iz)
-    !uboundary(7,1:marg) = box%bz(100,iz-marg+1:iz)
-    !uboundary(8,1:marg) = box%e(100,iz-marg+1:iz)
-    !uboundary(9,1:marg) = pre(iz-marg+1:iz)
-    
     uboundary(1,1:marg) = den(iiz-marg+1:iiz) - den(iiz-marg:iiz-1)
-    uboundary(2,1:marg) = box%rovx(10,iz-marg+1:iz) - box%rovx(10,iz-marg:iz-1)
-    uboundary(3,1:marg) = box%rovy(10,iz-marg+1:iz) - box%rovy(10,iz-marg:iz-1)
-    uboundary(4,1:marg) = box%rovz(10,iz-marg+1:iz) - box%rovz(10,iz-marg:iz-1)
-    uboundary(5,1:marg) = box%bx(10,iz-marg+1:iz) - box%bx(10,iz-marg:iz-1)
-    uboundary(6,1:marg) = box%by(10,iz-marg+1:iz) - box%by(10,iz-marg:iz-1)
-    uboundary(7,1:marg) = box%bz(10,iz-marg+1:iz) - box%bz(10,iz-marg:iz-1)
-    uboundary(8,1:marg) = box%e(10,iz-marg+1:iz) - box%e(10,iz-marg:iz-1)
+    uboundary(2,1:marg) = box%rovx(10,10,iz-marg+1:iz) - box%rovx(10,10,iz-marg:iz-1)
+    uboundary(3,1:marg) = box%rovy(10,10,iz-marg+1:iz) - box%rovy(10,10,iz-marg:iz-1)
+    uboundary(4,1:marg) = box%rovz(10,10,iz-marg+1:iz) - box%rovz(10,10,iz-marg:iz-1)
+    uboundary(5,1:marg) = box%bx(10,10,iz-marg+1:iz) - box%bx(10,10,iz-marg:iz-1)
+    uboundary(6,1:marg) = box%by(10,10,iz-marg+1:iz) - box%by(10,10,iz-marg:iz-1)
+    uboundary(7,1:marg) = box%bz(10,10,iz-marg+1:iz) - box%bz(10,10,iz-marg:iz-1)
+    uboundary(8,1:marg) = box%e(10,10,iz-marg+1:iz) - box%e(10,10,iz-marg:iz-1)
     uboundary(9,1:marg) = pre(iiz-marg+1:iiz) - pre(iiz-marg:iiz-1)
 
 end subroutine
