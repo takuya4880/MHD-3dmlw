@@ -3,6 +3,7 @@ cabal-dev
 *.out
 *.mod
 *.dat
+*.dac.*
 *.o
 *.hi
 *.chi
