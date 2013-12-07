@@ -1,107 +1,129 @@
 module lw
 implicit none 
 contains
-subroutine lw1(box, h, d, fx, fz, s)
+subroutine lw1(box, h, d, fx, fy, fz, s)
     use defstruct
     implicit none
-    type(cell) :: box, h, d, fx, fz, s
+    type(cell) :: box, h, d, fx, fy, fz, s
     
-    double precision :: dx, dz, dt
+    double precision :: dx, dy, dz, dt
     dx = box%con%dx
+    dy = box%con%dy
     dz = box%con%dz
     dt = box%con%dt
 
-    call each1(box%ro,h%ro,d%ro,fx%ro,fz%ro,s%ro,dx,dz,dt)
-    call each1(box%rovx,h%rovx,d%rovx,fx%rovx,fz%rovx,s%rovx,dx,dz,dt)
-    call each1(box%rovy,h%rovy,d%rovy,fx%rovy,fz%rovy,s%rovy,dx,dz,dt)
-    call each1(box%rovz,h%rovz,d%rovz,fx%rovz,fz%rovz,s%rovz,dx,dz,dt)
-    call each1(box%bx,h%bx,d%bx,fx%bx,fz%bx,s%bx,dx,dz,dt)
-    call each1(box%by,h%by,d%by,fx%by,fz%by,s%by,dx,dz,dt)
-    call each1(box%bz,h%bz,d%bz,fx%bz,fz%bz,s%bz,dx,dz,dt)
-    call each1(box%e,h%e,d%e,fx%e,fz%e,s%e,dx,dz,dt)
-    call each1(box%bpot,h%bpot,d%bpot,fx%bpot,fz%bpot,s%bpot,dx,dz,dt)
-    
+    call each1(box%ro,h%ro,d%ro,fx%ro,fy%ro,fz%ro,s%ro,dx,dy,dz,dt)
+    call each1(box%rovx,h%rovx,d%rovx,fx%rovx,fy%rovx,fz%rovx,s%rovx,dx,dy,dz,dt)
+    call each1(box%rovy,h%rovy,d%rovy,fx%rovy,fy%rovy,fz%rovy,s%rovy,dx,dy,dz,dt)
+    call each1(box%rovz,h%rovz,d%rovz,fx%rovz,fy%rovz,fz%rovz,s%rovz,dx,dy,dz,dt)
+    call each1(box%bx,h%bx,d%bx,fx%bx,fy%bx,fz%bx,s%bx,dx,dy,dz,dt)
+    call each1(box%by,h%by,d%by,fx%by,fy%by,fz%by,s%by,dx,dy,dz,dt)
+    call each1(box%bz,h%bz,d%bz,fx%bz,fy%bz,fz%bz,s%bz,dx,dy,dz,dt)
+    call each1(box%e,h%e,d%e,fx%e,fy%e,fz%e,s%e,dx,dy,dz,dt)
     
 end subroutine
 
-subroutine each1(u,h,d,fx,fz,s,dx,dz,dt)
+subroutine each1(u,h,d,fx,fy,fz,s,dx,dy,dz,dt)
     use defstruct
     !$use omp_lib
     implicit none
-    double precision :: u(ix,iz),d(ix,iz),h(ix,iz)
-    double precision :: fx(ix,iz),fz(ix,iz),s(ix,iz)
-    double precision :: dx, dz, dt
+    double precision :: u(ix,iy,iz),d(ix,iy,iz),h(ix,iy,iz)
+    double precision :: fx(ix,iy,iz),fy(ix,iy,iz),fz(ix,iy,iz),s(ix,iy,iz)
+    double precision :: dx, dy, dz, dt
     
-    integer i,j
-    double precision fffx, fffz, ss
-    double precision ddx, ddz
+    integer i,j,k
+    double precision fffx, fffy, fffz, ss
+    double precision ddx, ddy, ddz
     
     ddx = dt/dx
+    ddy = dt/dy
     ddz = dt/dz
+    
+    do k=2,iz-1
+     do j=2,iy-1
+      do i=2,ix-1
+          d(i,j,k) = -0.5*ddx*(0.5*(fx(i+1,j,k)-fx(i-1,j,k)))&
+                     -0.5*ddy*(0.5*(fy(i,j+1,k)-fy(i,j-1,k)))&
+                     -0.5*ddz*(0.5*(fz(i,j,k+1)-fz(i,j,k-1)))&
+                     +0.5*dt*s(i,j,k)
+      end do
+     end do
+    end do
 
-    d(2:ix-1,2:iz-1) = -0.5*ddx*(0.5*(fx(3:ix,2:iz-1)-fx(1:ix-2,2:iz-1)))&
-                       -0.5*ddz*(0.5*(fz(2:ix-1,3:iz)-fz(2:ix-1,1:iz-2)))&
-                       +0.5*dt*s(2:ix-1,2:iz-1)
-
-    !$omp parallel do private(j,fffx,fffz,ss) 
-    do i=1,iz-1
-        do j=1,ix-1
-            fffx = 0.5 * ( fx(j+1,i+1)+fx(j+1,i)-fx(j,i+1)-fx(j,i) )
-            fffz = 0.5 * ( fz(j+1,i+1)-fz(j+1,i)+fz(j,i+1)-fz(j,i) )
-            ss   = 0.25 * ( s(j+1,i+1) +s(j+1,i) +s(j,i+1) +s(j,i) )
-            h(j,i) = 0.25 *(u(j+1,i+1) +u(j+1,i) +u(j,i+1) +u(j,i) ) &
-                        - (ddx*fffx + ddz*fffz - dt*ss)
-        end do
+    !$omp parallel do private(i,j,fffx,fffy,fffz,ss) 
+    do k=1,iz-1
+     do j=1,iy-1
+      do i=1:ix-1
+          fffx = 0.25* ( fx(i+1,j+1,k+1)+fx(i+1,j,k+1)-fx(i,j+1,k+1)-fx(i,j,k+1) &
+                        +fx(i+1,j+1,k  )+fx(i+1,j,k  )-fx(i,j+1,k  )-fx(i,j,k  ) )
+          fffy = 0.25* ( fy(i+1,j+1,k+1)-fy(i+1,j,k+1)+fy(i,j+1,k+1)-fy(i,j,k+1) &
+                        +fy(i+1,j+1,k  )-fy(i+1,j,k  )+fy(i,j+1,k  )-fy(i,j,k  ) )
+          fffy = 0.25* ( fz(i+1,j+1,k+1)+fz(i+1,j,k+1)+fz(i,j+1,k+1)+fz(i,j,k+1) &
+                        -fz(i+1,j+1,k  )-fz(i+1,j,k  )-fz(i,j+1,k  )-fz(i,j,k  ) )
+          ss   = 0.125* ( s(i+1,j+1,k+1)+ s(i+1,j,k+1)+ s(i,j+1,k+1)+ s(i,j,k+1) &
+                        + s(i+1,j+1,k  )+ s(i+1,j,k  )+ s(i,j+1,k  )+ s(i,j,k  ) )
+          h(j,i)= 0.125* (u(i+1,j+1,k+1)+ u(i+1,j,k+1)+ u(i,j+1,k+1)+ u(i,j,k+1) &
+                        + u(i+1,j+1,k  )+ u(i+1,j,k  )+ u(i,j+1,k  )+ u(i,j,k  ) )&
+                        - (ddx*fffx + ddy*fffy + ddz*fffz - dt*ss)
+      end do
+     end do
     end do
     !$omp end parallel do
 end subroutine
 
-subroutine lw2(box, d, fx, fz, s)
+subroutine lw2(box, d, fx, fy, fz, s)
     use defstruct
     implicit none
-    type(cell) :: box, d, fx, fz, s
+    type(cell) :: box, d, fx, fy, fz, s
     
-    double precision :: dx, dz, dt
+    double precision :: dx, dy, dz, dt
     dx = box%con%dx
+    dy = box%con%dy
     dz = box%con%dz
     dt  = box%con%dt
 
-    call each2(box%ro,d%ro,fx%ro,fz%ro,s%ro,dx,dz,dt)
-    call each2(box%rovx,d%rovx,fx%rovx,fz%rovx,s%rovx,dx,dz,dt)
-    call each2(box%rovy,d%rovy,fx%rovy,fz%rovy,s%rovy,dx,dz,dt)
-    call each2(box%rovz,d%rovz,fx%rovz,fz%rovz,s%rovz,dx,dz,dt)
-    call each2(box%bx,d%bx,fx%bx,fz%bx,s%bx,dx,dz,dt)
-    call each2(box%by,d%by,fx%by,fz%by,s%by,dx,dz,dt)
-    call each2(box%bz,d%bz,fx%bz,fz%bz,s%bz,dx,dz,dt)
-    call each2(box%e,d%e,fx%e,fz%e,s%e,dx,dz,dt)
-    call each2(box%bpot,d%bpot,fx%bpot,fz%bpot,s%bpot,dx,dz,dt)
-   
+    call each2(box%ro,d%ro,fx%ro,fy%ro,fz%ro,s%ro,dx,dy,dz,dt)
+    call each2(box%rovx,d%rovx,fx%rovx,fy%rovx,fz%rovx,s%rovx,dx,dy,dz,dt)
+    call each2(box%rovy,d%rovy,fx%rovy,fy%rovy,fz%rovy,s%rovy,dx,dy,dz,dt)
+    call each2(box%rovz,d%rovz,fx%rovz,fy%rovz,fz%rovz,s%rovz,dx,dy,dz,dt)
+    call each2(box%bx,d%bx,fx%bx,fy%bx,fz%bx,s%bx,dx,dy,dz,dt)
+    call each2(box%by,d%by,fx%by,fy%by,fz%by,s%by,dx,dy,dz,dt)
+    call each2(box%bz,d%bz,fx%bz,fy%bz,fz%bz,s%bz,dx,dy,dz,dt)
+    call each2(box%e,d%e,fx%e,fz%e,s%e,dx,dy,dz,dt)
 
 end subroutine
 
-subroutine each2(box,d,fx,fz,s,dx,dz,dt)
+subroutine each2(box,d,fx,fy,fz,s,dx,dy,dz,dt)
     use defstruct
     !$use omp_lib
     implicit none
-    double precision :: box(ix,iz),d(ix,iz)
-    double precision :: fx(ix,iz),fz(ix,iz),s(ix,iz)
-    double precision :: dx, dz, dt
+    double precision :: box(ix,iy,iz),d(ix,iy,iz)
+    double precision :: fx(ix,iy,iz),fz(ix,iy,iz),s(ix,iy,iz)
+    double precision :: dx, dy, dz, dt
     
-    integer i,j
-    double precision fffx,fffz,ss
-    double precision ddx, ddz
+    integer i,j,k
+    double precision fffx,fffy,fffz,ss
+    double precision ddx,ddy,ddz
 
     ddx = dt/dx
+    ddy = dt/dy
     ddz = dt/dz
     
-    !$omp parallel do private(j,fffx,fffz,ss) 
-    do i=1,iz-2
-        do j=1,ix-2
-            fffx = 0.5 * (fx(j+1,i+1)+fx(j+1,i)-fx(j,i+1)-fx(j,i))
-            fffz = 0.5 * (fz(j+1,i+1)-fz(j+1,i)+fz(j,i+1)-fz(j,i))
-            ss  = 0.25 * ( s(j+1,i+1) +s(j+1,i) +s(j,i+1) +s(j,i) )
-            d(j+1,i+1) = d(j+1,i+1) - 0.5*(ddx*fffx + ddz*fffz - dt*ss)
-        end do
+    !$omp parallel do private(i,j,fffx,fffy,fffz,ss) 
+    do k=1,iz-2
+     do j=1,iy-2
+      do i=1,ix-2
+          fffx = 0.25* ( fx(i+1,j+1,k+1)+fx(i+1,j,k+1)-fx(i,j+1,k+1)-fx(i,j,k+1) &
+                        +fx(i+1,j+1,k  )+fx(i+1,j,k  )-fx(i,j+1,k  )-fx(i,j,k  ) )
+          fffy = 0.25* ( fy(i+1,j+1,k+1)-fy(i+1,j,k+1)+fy(i,j+1,k+1)-fy(i,j,k+1) &
+                        +fy(i+1,j+1,k  )-fy(i+1,j,k  )+fy(i,j+1,k  )-fy(i,j,k  ) )
+          fffy = 0.25* ( fz(i+1,j+1,k+1)+fz(i+1,j,k+1)+fz(i,j+1,k+1)+fz(i,j,k+1) &
+                        -fz(i+1,j+1,k  )-fz(i+1,j,k  )-fz(i,j+1,k  )-fz(i,j,k  ) )
+          ss   = 0.125* ( s(i+1,j+1,k+1)+ s(i+1,j,k+1)+ s(i,j+1,k+1)+ s(i,j,k+1) &
+                        + s(i+1,j+1,k  )+ s(i+1,j,k  )+ s(i,j+1,k  )+ s(i,j,k  ) )
+          d(j+1,i+1) = d(j+1,i+1) - 0.5*(ddx*fffx + ddy*fffy + ddz*fffz - dt*ss)
+      end do
+     end do
     end do
     !$omp end parallel do
 
@@ -112,89 +134,97 @@ subroutine artvis(box, d)
     !$use omp_lib
     implicit none
     type(cell) :: box, d
-    double precision, allocatable :: kapx(:,:),kapz(:,:)
-    allocate(kapx(ix,iz),kapz(ix,iz))
+    double precision, allocatable :: kapx(:,:,:),kapy(:,:,:),kapz(:,:,:)
+    allocate(kapx(ix,iy,iz),kapy(ix,iy,iz),kapz(ix,iy,iz))
     
     !$omp parallel workshare
-    kapx(2:ix,:) = box%con%q * abs(box%rovx(2:ix,:)/box%ro(2:ix,:) &
-                                    - box%rovx(1:ix-1,:)/box%ro(1:ix-1,:))
-    kapz(:,2:iz) = box%con%q * abs(box%rovz(:,2:iz)/box%ro(:,2:iz) &
-                                    - box%rovz(:,1:iz-1)/box%ro(:,1:iz-1)) 
+    kapx(2:ix,:,:) = box%con%q * abs(box%rovx(2:ix,:,:)/box%ro(2:ix,:,:) &
+                                    - box%rovx(1:ix-1,:,:)/box%ro(1:ix-1,:,:))
+    kapy(:,2:iy,:) = box%con%q * abs(box%rovy(:,2:iy,:)/box%ro(:,2:iy,:) &
+                                    - box%rovy(:,1:iy-1,:)/box%ro(:,1:iy-1,:))
+    kapz(:,:,2:iz) = box%con%q * abs(box%rovz(:,:,2:iz)/box%ro(:,:,2:iz) &
+                                    - box%rovz(:,:,1:iz-1)/box%ro(:,:,1:iz-1)) 
     !$omp end parallel workshare
 
-    call eachav(box%ro, d%ro, kapx, kapz, box%con)
-    call eachav(box%rovx, d%rovx, kapx, kapz, box%con)
-    call eachav(box%rovy, d%rovy, kapx, kapz, box%con)
-    call eachav(box%rovz, d%rovz, kapx, kapz, box%con)
-    call eachav(box%bx, d%bx, kapx, kapz, box%con)
-    call eachav(box%by, d%by, kapx, kapz, box%con)
-    call eachav(box%bz, d%bz, kapx, kapz, box%con)
-    call eachav(box%e, d%e, kapx, kapz, box%con)
-    call eachav(box%bpot, d%bpot, kapx, kapz, box%con)
+    call eachav(box%ro, d%ro, kapx, kapy, kapz, box%con)
+    call eachav(box%rovx, d%rovx, kapx, kapy, kapz, box%con)
+    call eachav(box%rovy, d%rovy, kapx, kapy, kapz, box%con)
+    call eachav(box%rovz, d%rovz, kapx, kapy, kapz, box%con)
+    call eachav(box%bx, d%bx, kapx, kapy, kapz, box%con)
+    call eachav(box%by, d%by, kapx, kapy, kapz, box%con)
+    call eachav(box%bz, d%bz, kapx, kapy, kapz, box%con)
+    call eachav(box%e, d%e, kapx, kapy, kapz, box%con)
 
-    deallocate(kapx,kapz)
+    deallocate(kapx,kapy,kapz)
 
 end subroutine
 
-subroutine eachav(box,d,kapx,kapz,con)
+subroutine eachav(box,d,kapx,kapy,kapz,con)
     use defstruct
     !$use omp_lib
-    double precision :: box(ix,iz),d(ix,iz)
-    double precision :: kapx(ix,iz),kapz(ix,iz)
+    double precision :: box(ix,iy,iz),d(ix,iy,iz)
+    double precision :: kapx(ix,iy,iz),kapy(ix,iy,iz),kapz(ix,iy,iz)
     type(constants) con
     
-    double precision :: ddx, ddz
-    double precision, allocatable :: difx(:,:),difz(:,:)
-    allocate(difx(ix,iz),difz(ix,iz))
+    double precision :: ddx, ddy, ddz
+    double precision, allocatable :: difx(:,:,:),dify(:,:,:),difz(:,:,:)
+    allocate(difx(ix,iy,iz),dify(ix,iy,iz),difz(ix,iy,iz))
     ddx = con%dt / con%dx
+    ddy = con%dt / con%dy
     ddz = con%dt / con%dz
     
     !$omp parallel
     !$omp workshare
-    difx(2:ix,:) = box(2:ix,:) - box(1:ix-1,:)
-    difz(:,2:iz) = box(:,2:iz) - box(:,1:iz-1)
+    difx(2:ix,:,:) = box(2:ix,:,:) - box(1:ix-1,:,:)
+    dify(:,2:iy,:) = box(:,2:iy,:) - box(:,1:iy-1,:)
+    difz(:,:,2:iz) = box(:,:,2:iz) - box(:,:,1:iz-1)
     !$omp end workshare
     !$omp workshare
-    box(3:ix-2,3:iz-2) = box(3:ix-2,3:iz-2) + d(3:ix-2,3:iz-2) &
-             + ddx * ( kapx(4:ix-1,3:iz-2)*difx(4:ix-1,3:iz-2)     &
-                       - kapx(3:ix-2,3:iz-2)*difx(3:ix-2,3:iz-2) ) &
-             + ddz * ( kapz(3:ix-2,4:iz-1)*difz(3:ix-2,4:iz-1)     &
-                       - kapz(3:ix-2,3:iz-2)*difz(3:ix-2,3:iz-2) ) 
+    box(3:ix-2,3:iy-2,3:iz-2) = box(3:ix-2,3:iy-2,3:iz-2) + d(3:ix-2,3:iy-2,3:iz-2) &
+             + ddx * ( kapx(4:ix-1,3:iy-2,3:iz-2)*difx(4:ix-1,3:iy-2,3:iz-2) &
+                     - kapx(3:ix-2,3:iy-2,3:iz-2)*difx(3:ix-2,3:iy-2,3:iz-2) ) &
+             + ddy * ( kapx(3:ix-2,4:iy-1,3:iz-2)*difx(3:ix-2,4:iy-1,3:iz-2) &
+                     - kapx(3:ix-2,3:iy-2,3:iz-2)*difx(3:ix-2,3:iy-2,3:iz-2) ) &
+             + ddz * ( kapz(3:ix-2,3:iy-2,4:iz-1)*difz(3:ix-2,3:iy-2,4:iz-1) &
+                     - kapz(3:ix-2,3:iy-2,3:iz-2)*difz(3:ix-2,3:iy-2,3:iz-2) ) 
     !$omp end workshare
     !$omp end parallel 
     deallocate(difx,difz)
 end subroutine 
 
-subroutine flux(box, fx, fz)
+subroutine flux(box, fx, fy, fz)
     use defstruct
     implicit none
-    type(cell) :: box, fx, fz
+    type(cell) :: box, fx, fy, fz
     
-    integer :: i,j
+    integer :: i,j,k
     double precision :: alp=0.01, etamax=1., vc=1000
     double precision :: b2,roi,h,vx,vy,vz,bx,by,bz,pr
     double precision :: eta, ex, ey, ez
     double precision :: jx, jy, jz
 
-    !$omp parallel do private(i,roi,vx,vy,vz,bx,by,bz,pr,b2,h,jx,jy,jz,eta,ex,ey,ez)
-    do j=2,iz-1
+    !$omp parallel do private(i,j,roi,vx,vy,vz,bx,by,bz,pr,b2,h,jx,jy,jz,eta,ex,ey,ez)
+    do k=2,iz-1
+      do j=2,iy-1
         do i=2,ix-1
-            roi = 1./box%ro(i,j)
-            vx = box%rovx(i,j) * roi
-            vy = box%rovy(i,j) * roi
-            vz = box%rovz(i,j) * roi
-            bx = box%bx(i,j)
-            by = box%by(i,j)
-            bz = box%bz(i,j)
-            pr = box%pr(i,j)
+            roi = 1./box%ro(i,j,k)
+            vx = box%rovx(i,j,k) * roi
+            vy = box%rovy(i,j,k) * roi
+            vz = box%rovz(i,j,k) * roi
+            bx = box%bx(i,j,k)
+            by = box%by(i,j,k)
+            bz = box%bz(i,j,k)
+            pr = box%pr(i,j,k)
             b2 = bx**2 + by**2 + bz**2
             h = 0.5*(vx**2+vy**2+vz**2)*box%ro(i,j) &
                         + pr*box%con%gam/(box%con%gam-1.)
 
-            jx = -(box%by(i,j+1)-box%by(i,j-1))/(2.*box%con%dz)
-            jy = (box%bx(i,j+1)-box%bx(i,j-1))/(2.*box%con%dz) &
-                        -(box%bz(i+1,j)-box%bz(i-1,j))/(2.*box%con%dx)
-            jz = (box%by(i+1,j)-box%by(i-1,j))/(2.*box%con%dx)
+            jx = (box%bz(i,j+1,k)-box%bz(i,j-1,k))/(2.*box%con%dy) &
+                        -(box%by(i,j,k+1)-box%by(i,j,k-1))/(2.*box%con%dz)
+            jy = (box%bx(i,j,k+1)-box%bx(i,j,k-1))/(2.*box%con%dz) &
+                        -(box%bz(i+1,j,k)-box%bz(i-1,j,k))/(2.*box%con%dx)
+            jz = (box%by(i+1,j,k)-box%by(i-1,j,k))/(2.*box%con%dx) &
+                        -(box%bx(i,j+1,k)-box%bx(i,j-1,k))/(2.*box%con%dy)
 
             eta = sqrt((jx**2+jy**2+jz**2)*16.*atan(1.0))*roi  !calculate vd
             
@@ -210,25 +240,32 @@ subroutine flux(box, fx, fz)
             ey = eta*jy + (-vz*bx+vx*bz)
             ez = eta*jz + (-vx*by+vy*bx)
 
-            fx%ro(i,j) = box%rovx(i,j)
-            fx%rovx(i,j) = vx*box%rovx(i,j) - bx*bx + pr + 0.5*b2
-            fx%rovy(i,j) = vx*box%rovy(i,j) - bx*by
-            fx%rovz(i,j) = vx*box%rovz(i,j) - bx*bz
-            fx%bx(i,j) = 0.
-            fx%by(i,j) = -ez
-            fx%bz(i,j) = ey
-            fx%e(i,j) = h*vx + (ey*bz - ez*by) 
-            fx%bpot(i,j) = 0
+            fx%ro(i,j,k) = box%rovx(i,j,k)
+            fx%rovx(i,j,k) = vx*box%rovx(i,j,k) - bx*bx + pr + 0.5*b2
+            fx%rovy(i,j,k) = vx*box%rovy(i,j,k) - bx*by
+            fx%rovz(i,j,k) = vx*box%rovz(i,j,k) - bx*bz
+            fx%bx(i,j,k) = 0.
+            fx%by(i,j,k) = -ez
+            fx%bz(i,j,k) = ey
+            fx%e(i,j,k) = h*vx + (ey*bz - ez*by) 
 
-            fz%ro(i,j) = box%rovz(i,j)
-            fz%rovx(i,j) = vz*box%rovx(i,j) - bz*bx
-            fz%rovy(i,j) = vz*box%rovy(i,j) - bz*by
-            fz%rovz(i,j) = vz*box%rovz(i,j) - bz*bz + pr + 0.5*b2
-            fz%bx(i,j) = -ey
-            fz%by(i,j) = ex
-            fz%bz(i,j) = 0.
-            fz%e(i,j) = h*vz + (ex*by - ey*bx)
-            fz%bpot(i,j) = 0
+            fy%ro(i,j,k) = box%rovy(i,j,k)
+            fy%rovx(i,j,k) = vy*box%rovx(i,j,k) - by*bx
+            fy%rovy(i,j,k) = vy*box%rovy(i,j,k) - by*by + pr + 0.5*b2
+            fy%rovz(i,j,k) = vy*box%rovz(i,j,k) - by*bz
+            fy%bx(i,j,k) = ez
+            fy%by(i,j,k) = 0.
+            fy%bz(i,j,k) = -ex
+            fy%e(i,j,k) = h*vy + (ez*bx - ex*bz) 
+
+            fz%ro(i,j,k) = box%rovz(i,j,k)
+            fz%rovx(i,j,k) = vz*box%rovx(i,j,k) - bz*bx
+            fz%rovy(i,j,k) = vz*box%rovy(i,j,k) - bz*by
+            fz%rovz(i,j,k) = vz*box%rovz(i,j,k) - bz*bz + pr + 0.5*b2
+            fz%bx(i,j,k) = -ey
+            fz%by(i,j,k) = ex
+            fz%bz(i,j,k) = 0.
+            fz%e(i,j,k) = h*vz + (ex*by - ey*bx)
         end do
     end do
     !$omp end parallel do 
@@ -245,11 +282,13 @@ subroutine source(box, s)
     double precision :: fugou(iz)
    
     fugou = 1.
-    if (box%con%a==-1) then 
-        fugou(1:marg-1) = -1.
-        fugou(marg) = 0.
-    else
-        fugou(1:marg) = -1.
+    if (box%con%imz==1) then
+        if (box%con%a==-1) then 
+            fugou(1:marg-1) = -1.
+            fugou(marg) = 0.
+        else
+            fugou(1:marg) = -1.
+        end if
     end if
 
     !$omp parallel workshare
@@ -258,12 +297,10 @@ subroutine source(box, s)
     s%by = 0.
     s%bz = 0.
     s%rovx = box%ro*box%con%gx
-    !s%rovy = box%ro*box%con%gy
     s%rovy = box%ro*box%con%gy
-    s%rovz = box%ro*box%con%gz*spread(fugou,1,ix)
+    s%rovz = box%ro*box%con%gz*spread(spread(fugou,1,ix)2,iy)
     s%e = box%rovx*box%con%gx + box%rovy*box%con%gy + box%rovz*box%con%gz
 
-    s%bpot = (box%rovx*box%bz - box%rovz*box%bx)/box%ro
     !$omp end parallel workshare
 end subroutine
 
