@@ -8,7 +8,7 @@ subroutine initial(box, uboundary)
     double precision :: uboundary(9,marg)
 
     integer :: i,j,m,origin
-    integer :: head, tail
+    integer :: offset, head, tail
     double precision :: gami               !inberse of gamma
     double precision :: wid
     double precision :: amp, tpt, tpho, tcor, x, z, a, ad, lp, phicor
@@ -87,10 +87,11 @@ subroutine initial(box, uboundary)
     !end do
     !close(24)
 
-    head = nz*(box%con%imz-1) + 1 
-    tail = head + iz - 1
+    offset = nz*(box%con%imz-1) 
+    !head = nz*(box%con%imz-1) + 1 
+    !tail = head + iz - 1
 
-    forall(i=head:tail) box%ro(:,:,i) = den(i)
+    forall(i=1:iz) box%ro(:,:,i) = den(i+offset)
     box%rovx = 0.
     box%rovy = 0.
     box%rovz = 0.
@@ -104,10 +105,10 @@ subroutine initial(box, uboundary)
         end do
     end do
 
-    forall(i=head:tail) box%bx(:,:,i) = b(i)*cos(phi(i))
+    forall(i=1:iz) box%bx(:,:,i) = b(i+offset)*cos(phi(i+offset))
     box%by = 0.
-    forall(i=head:tail) box%bz(:,:,i) = b(i)*sin(phi(i))
-    forall(i=head:tail) box%pr(:,:,i) = pre(i) 
+    forall(i=1:iz) box%bz(:,:,i) = b(i+offset)*sin(phi(i+offset))
+    forall(i=1:iz) box%pr(:,:,i) = pre(i+offset) 
     box%e = 0.5*(box%rovx**2 + box%rovy**2 + box%rovz**2)/box%ro &
             + box%pr/(box%con%gam-1.) &
             + 0.5*(box%bx**2 + box%by**2 + box%bz**2)
