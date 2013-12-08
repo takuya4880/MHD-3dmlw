@@ -8,7 +8,7 @@ subroutine initial(box, uboundary)
     double precision :: uboundary(9,marg)
 
     integer :: i,j,m,origin
-    integer :: offset, head, tail
+    integer :: offset
     double precision :: gami               !inberse of gamma
     double precision :: wid
     double precision :: amp, tpt, tpho, tcor, x, z, a, ad, lp, phicor
@@ -88,8 +88,6 @@ subroutine initial(box, uboundary)
     !close(24)
 
     offset = nz*(box%con%imz-1) 
-    !head = nz*(box%con%imz-1) + 1 
-    !tail = head + iz - 1
 
     forall(i=1:iz) box%ro(:,:,i) = den(i+offset)
     box%rovx = 0.

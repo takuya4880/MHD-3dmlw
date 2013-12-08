@@ -30,6 +30,7 @@ subroutine detdt(box)
             end do
         end do
     end do
+    sync all
     box%con%dt = minval(dt)
 
     deallocate(v2)
