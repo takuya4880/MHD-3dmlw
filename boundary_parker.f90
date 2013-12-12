@@ -10,6 +10,7 @@ subroutine boundary(box, uboundary)
 
     imz = box%con%imz
 
+
     if (imz==coz) then
         call upgradbc(box%ro, 1, uboundary)
         call upgradbc(box%rovx, 2, uboundary)

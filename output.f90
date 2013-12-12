@@ -9,14 +9,14 @@ subroutine outp(box,t)
     double precision :: t
 
     write(box%op%mf_t) t
-    write(box%op%mf_ro) box%ro
-    write(box%op%mf_pr) box%pr
-    write(box%op%mf_vx) box%rovx/box%ro
-    write(box%op%mf_vy) box%rovy/box%ro
-    write(box%op%mf_vz) box%rovz/box%ro
-    write(box%op%mf_bx) box%bx
-    write(box%op%mf_by) box%by
-    write(box%op%mf_bz) box%bz
+    write(box%op%mf_ro) box%ro(:,10,:)
+    write(box%op%mf_pr) box%pr(:,10,:)
+    write(box%op%mf_vx) box%rovx(:,10,:)/box%ro(:,10,:)
+    write(box%op%mf_vy) box%rovz(:,10,:)/box%ro(:,10,:)
+    write(box%op%mf_vz) box%rovz(:,10,:)/box%ro(:,10,:)
+    write(box%op%mf_bx) box%bx(:,10,:)
+    write(box%op%mf_by) box%bz(:,10,:)
+    write(box%op%mf_bz) box%bz(:,10,:)
 
 end subroutine 
 

@@ -29,7 +29,7 @@ program main
     box%con%imx = this_image(box,1)
     box%con%imy = this_image(box,2)
     box%con%imz = this_image(box,3)
-    box%con%wid = 60.
+    box%con%wid = 150.
     box%con%dep = 20.
     box%con%hig = 60.
     box%con%dx = box%con%wid/dble(nnx-1)
@@ -37,7 +37,7 @@ program main
     box%con%dz = box%con%hig/dble(nnz-1)
     box%con%a = 0.4
     box%con%q = 3.
-    box%con%gam = 5./3.
+    box%con%gam = 1.4
 
     t = 0.
     tint = 1.
@@ -49,12 +49,14 @@ program main
     call initial(box, uboundary)
     sync all
     call boundary(box, uboundary)
-    !call outpinit(box)
-    !if (mcont==1) then
-    !    call readdata(box,t)
-    !    tnxt = dint(t) + tint
-    !end if
-    !call outp(box,t)
+    if (box%con%imy==1) then
+    call outpinit(box)
+    if (mcont==1) then
+        call readdata(box,t)
+        tnxt = dint(t) + tint
+    end if
+    call outp(box,t)
+    end if 
     call pressure(box)
 
     do
@@ -66,7 +68,9 @@ program main
         ns = ns + 1
         if (box%con%imx*box%con%imy*box%con%imz==1) print *,t,box%con%dt 
         if (t>=tnxt .or. ns>=nsout) then
-            !call outp(box,t)
+            if (box%con%imy==1) then
+            call outp(box,t)
+            end if
             tnxt = tnxt + tint
             ns = 0
         endif

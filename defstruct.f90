@@ -1,9 +1,9 @@
 module defstruct
     implicit none
     integer,parameter :: nx=100
-    integer,parameter :: ny=30
+    integer,parameter :: ny=20
     integer,parameter :: nz=100
-    integer,parameter :: cox=2
+    integer,parameter :: cox=3
     integer,parameter :: coy=2
     integer,parameter :: coz=2
     integer,parameter :: nnx=nx*cox
