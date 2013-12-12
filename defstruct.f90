@@ -1,11 +1,11 @@
 module defstruct
     implicit none
-    integer,parameter :: nx=100
-    integer,parameter :: ny=70
-    integer,parameter :: nz=100
-    integer,parameter :: cox=7
-    integer,parameter :: coy=3
-    integer,parameter :: coz=6
+    integer,parameter :: nx=70
+    integer,parameter :: ny=200
+    integer,parameter :: nz=50
+    integer,parameter :: cox=10
+    integer,parameter :: coy=1
+    integer,parameter :: coz=12
     integer,parameter :: nnx=nx*cox
     integer,parameter :: nny=ny*coy
     integer,parameter :: nnz=nz*coz

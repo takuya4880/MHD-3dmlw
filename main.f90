@@ -40,7 +40,7 @@ program main
     box%con%gam = 1.4
 
     t = 0.
-    tint = 4.
+    tint = 5.
     tnxt = tint
     tend = 80.
     ns = 0
