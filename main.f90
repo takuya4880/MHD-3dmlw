@@ -50,7 +50,7 @@ program main
     sync all
     call boundary(box, uboundary)
     sync all
-    if (box%con%imy==2) then
+    if (box%con%imy==1) then
         call outpinit(box)
         if (mcont==1) then
             call readdata(box,t)
@@ -70,14 +70,12 @@ program main
         ns = ns + 1
         if (box%con%imx*box%con%imy*box%con%imz==1) print *,t,box%con%dt 
         if (t>=tnxt .or. ns>=nsout) then
-            if (box%con%imy==2) then
+            if (box%con%imy==1) then
             call outp(box,t)
             end if
             tnxt = tnxt + tint
             ns = 0
         endif
-        if (t>tend) exit
-        if (box%con%dt<1.e-10) exit
 
         call date_and_time(tmp,tmp,tmp,time)
         time = time - start
@@ -92,7 +90,7 @@ program main
             end do
         end do 
         sync all
-        if (product(flag)==1) exit
+        if (product(flag)==1 .or. t>tend .or. box%con%dt<1.e-10) exit
         
     end do
 
