@@ -39,7 +39,7 @@ module defstruct
         double precision ro(ix,iy,iz)
         double precision rovx(ix,iy,iz), rovy(ix,iy,iz), rovz(ix,iy,iz)
         double precision bx(ix,iy,iz), by(ix,iy,iz), bz(ix,iy,iz)
-        double precision pr(ix,iy,iz), e(ix,iy,iz) 
+        double precision pr(ix,iy,iz), e(ix,iy,iz), eta(ix,iy,iz) 
     end type    
 
 

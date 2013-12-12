@@ -49,11 +49,11 @@ program main
     call initial(box, uboundary)
     sync all
     call boundary(box, uboundary)
-    if (box%con%imy==1) then
+    if (box%con%imy==2) then
     call outpinit(box)
     if (mcont==1) then
         call readdata(box,t)
-        tnxt = dint(t) + tint
+        tnxt = t + tint
     end if
     call outp(box,t)
     end if 
@@ -68,7 +68,7 @@ program main
         ns = ns + 1
         if (box%con%imx*box%con%imy*box%con%imz==1) print *,t,box%con%dt 
         if (t>=tnxt .or. ns>=nsout) then
-            if (box%con%imy==1) then
+            if (box%con%imy==2) then
             call outp(box,t)
             end if
             tnxt = tnxt + tint
