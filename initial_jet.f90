@@ -111,15 +111,15 @@ subroutine initial(box, uboundary)
             + box%pr/(box%con%gam-1.) &
             + 0.5*(box%bx**2 + box%by**2 + box%bz**2)
 
-    uboundary(1,1:marg) = den(iiz-marg+1:iiz) - den(iiz-marg:iiz-1)
-    uboundary(2,1:marg) = box%rovx(10,10,iz-marg+1:iz) - box%rovx(10,10,iz-marg:iz-1)
-    uboundary(3,1:marg) = box%rovy(10,10,iz-marg+1:iz) - box%rovy(10,10,iz-marg:iz-1)
-    uboundary(4,1:marg) = box%rovz(10,10,iz-marg+1:iz) - box%rovz(10,10,iz-marg:iz-1)
-    uboundary(5,1:marg) = box%bx(10,10,iz-marg+1:iz) - box%bx(10,10,iz-marg:iz-1)
-    uboundary(6,1:marg) = box%by(10,10,iz-marg+1:iz) - box%by(10,10,iz-marg:iz-1)
-    uboundary(7,1:marg) = box%bz(10,10,iz-marg+1:iz) - box%bz(10,10,iz-marg:iz-1)
-    uboundary(8,1:marg) = box%e(10,10,iz-marg+1:iz) - box%e(10,10,iz-marg:iz-1)
-    uboundary(9,1:marg) = pre(iiz-marg+1:iiz) - pre(iiz-marg:iiz-1)
+    uboundary(1,1:marg) = den(iiz-marg+1:iiz) - den(iiz-marg)
+    uboundary(2,1:marg) = box%rovx(10,10,iz-marg+1:iz) - box%rovx(10,10,iz-marg)
+    uboundary(3,1:marg) = box%rovy(10,10,iz-marg+1:iz) - box%rovy(10,10,iz-marg)
+    uboundary(4,1:marg) = box%rovz(10,10,iz-marg+1:iz) - box%rovz(10,10,iz-marg)
+    uboundary(5,1:marg) = box%bx(10,10,iz-marg+1:iz) - box%bx(10,10,iz-marg)
+    uboundary(6,1:marg) = box%by(10,10,iz-marg+1:iz) - box%by(10,10,iz-marg)
+    uboundary(7,1:marg) = box%bz(10,10,iz-marg+1:iz) - box%bz(10,10,iz-marg)
+    uboundary(8,1:marg) = box%e(10,10,iz-marg+1:iz) - box%e(10,10,iz-marg)
+    uboundary(9,1:marg) = pre(iiz-marg+1:iiz) - pre(iiz-marg)
 
 end subroutine
 end module

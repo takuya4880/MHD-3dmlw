@@ -10,6 +10,7 @@ subroutine boundary(box, uboundary)
 
     imz = box%con%imz
 
+    call periodicbc(box)    
 
     if (imz==coz) then
         call upgradbc(box%ro, 1, uboundary)
@@ -35,7 +36,6 @@ subroutine boundary(box, uboundary)
         call lowmrbc(box%pr)
     end if
 
-    call periodicbc(box)    
 
 end subroutine 
 
