@@ -40,7 +40,7 @@ program main
     box%con%gam = 1.4
 
     t = 0.
-    tint = 1.
+    tint = 4.
     tnxt = tint
     tend = 80.
     ns = 0
@@ -55,7 +55,7 @@ program main
         call readdata(box,t)
         tnxt = t + tint
     end if
-    call outp(box,t)
+    !call outp(box,t)
     call pressure(box)
 
     do
@@ -65,7 +65,7 @@ program main
         call boundary(box, uboundary)
         t = t + box%con%dt
         ns = ns + 1
-        if (box%con%imx*box%con%imy*box%con%imz==1) print *,t,box%con%dt 
+        if (this_image()==1) print *,t,box%con%dt 
         if (t>=tnxt .or. ns>=nsout) then
             call outp(box,t)
             tnxt = tnxt + tint

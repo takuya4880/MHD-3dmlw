@@ -54,6 +54,7 @@ subroutine outpinit(box)
     call dacdef3s(box%op%mf_vz,'vz.dac.'//cno,6,ix,iy,iz)
     call dacdef3s(box%op%mf_bx,'bx.dac.'//cno,6,ix,iy,iz)
     call dacdef3s(box%op%mf_by,'by.dac.'//cno,6,ix,iy,iz)
+    call dacdef3s(box%op%mf_bz,'bz.dac.'//cno,6,ix,iy,iz)
 
     call dacputparami(box%op%mf_params,'ix',ix)
     call dacputparami(box%op%mf_params,'jx',iy)
@@ -74,7 +75,7 @@ subroutine outpinit(box)
     write(box%op%mf_x) box%x
     call dacdef1d(box%op%mf_y,'y.dac.'//cno,6,iy)
     write(box%op%mf_y) box%y
-    call dacdef1d(box%op%mf_z,'y.dac.'//cno,6,iz)
+    call dacdef1d(box%op%mf_z,'z.dac.'//cno,6,iz)
     write(box%op%mf_y) box%z
     call dacputparamd(box%op%mf_params,'gm',box%con%gam)
 
