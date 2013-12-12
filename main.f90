@@ -49,13 +49,14 @@ program main
     call initial(box, uboundary)
     sync all
     call boundary(box, uboundary)
+    sync all
     if (box%con%imy==2) then
-    call outpinit(box)
-    if (mcont==1) then
-        call readdata(box,t)
-        tnxt = t + tint
-    end if
-    call outp(box,t)
+        call outpinit(box)
+        if (mcont==1) then
+            call readdata(box,t)
+            tnxt = t + tint
+        end if
+        call outp(box,t)
     end if 
     call pressure(box)
 
@@ -64,6 +65,7 @@ program main
         call step(box)
         sync all
         call boundary(box, uboundary)
+        sync all
         t = t + box%con%dt
         ns = ns + 1
         if (box%con%imx*box%con%imy*box%con%imz==1) print *,t,box%con%dt 
@@ -89,6 +91,7 @@ program main
                 end do
             end do
         end do 
+        sync all
         if (product(flag)==1) exit
         
     end do
