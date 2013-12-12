@@ -26,9 +26,9 @@ subroutine detdt(box)
 
     largest = 1.e-5
     
-    do k=1,iz-1
-      do j=1,iy-1
-        do i=1,ix-1
+    do k=2,iz-1
+      do j=2,iy-1
+        do i=2,ix-1
             jx = (box%bz(i,j+1,k)-box%bz(i,j-1,k))/(2.*box%con%dy) &
                         -(box%by(i,j,k+1)-box%by(i,j,k-1))/(2.*box%con%dz)
             jy = (box%bx(i,j,k+1)-box%bx(i,j,k-1))/(2.*box%con%dz) &
