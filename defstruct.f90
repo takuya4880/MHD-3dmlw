@@ -9,7 +9,7 @@ module defstruct
     integer,parameter :: nnx=nx*cox
     integer,parameter :: nny=ny*coy
     integer,parameter :: nnz=nz*coz
-    integer,parameter :: marg=6
+    integer,parameter :: marg=5
     integer,parameter :: ix=nx+2*marg
     integer,parameter :: iy=ny+2*marg
     integer,parameter :: iz=nz+2*marg
