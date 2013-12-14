@@ -14,7 +14,6 @@ program main
     double precision :: t, tint, tend, tnxt
     integer :: start(8), time(8), minits, timelimit
     integer :: flag(cox,coy,coz), timeup[cox,coy,coz,*] 
-    integer :: ns, nsout 
     character*10 :: tmp
     integer :: mcont
 
@@ -41,8 +40,6 @@ program main
     tint = 5.
     tnxt = tint
     tend = 110.
-    ns = 0
-    nsout = 1e5
 
     call initial(box, uboundary)
     sync all
@@ -64,13 +61,12 @@ program main
         call boundary(box, uboundary)
         sync all
         t = t + box%con%dt
-        ns = ns + 1
         if (this_image()==1) print *,t,box%con%dt 
-        if (t>=tnxt .or. ns>=nsout) then
+        if (t>=tnxt then
             call outp(box,t)
             tnxt = tnxt + tint
-            ns = 0
         endif
+        if (t>tend) exit
 
         sync all
         call date_and_time(tmp,tmp,tmp,time)
@@ -86,7 +82,6 @@ program main
             end do
         end do 
         sync all
-        if (t>tend) exit
         if (product(flag)==1 .or. box%con%dt<1.e-10) then
             call outp(box,t)
             exit
