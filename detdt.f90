@@ -7,7 +7,7 @@ subroutine detdt(box)
     implicit none
     type(cell) :: box[cox,coy,coz,*]
 
-    double precision, allocatable :: v2(ix,iy,iz)
+    double precision :: v2(ix,iy,iz)
     double precision :: d, dtwav, dtdif, dt(cox,coy,coz)
     integer :: i,j,k
     double precision :: alp=0.01, etamax=1., vc=1000
