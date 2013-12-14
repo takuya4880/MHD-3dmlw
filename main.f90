@@ -28,7 +28,7 @@ program main
     box%con%imy = this_image(box,2)
     box%con%imz = this_image(box,3)
     box%con%wid = 160.
-    box%con%dep = 50.
+    box%con%dep = 25.
     box%con%hig = 85.
     box%con%dx = box%con%wid/dble(nnx-1)
     box%con%dy = box%con%dep/dble(nny-1)
@@ -53,14 +53,16 @@ program main
         call readdata(box,t)
         tnxt = t + tint
     end if
-    !call outp(box,t)
+    call outp(box,t)
     call pressure(box)
 
     do
         call detdt(box)    
+        sync all
         call step(box)
         sync all
         call boundary(box, uboundary)
+        sync all
         t = t + box%con%dt
         ns = ns + 1
         if (this_image()==1) print *,t,box%con%dt 
@@ -70,6 +72,7 @@ program main
             ns = 0
         endif
 
+        sync all
         call date_and_time(tmp,tmp,tmp,time)
         time = time - start
         minits = time(3)*24*60+time(5)*60+time(6)

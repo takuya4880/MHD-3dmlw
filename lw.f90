@@ -105,9 +105,9 @@ subroutine each2(box,d,fx,fy,fz,s,dx,dy,dz,dt)
     ddy = dt/dy
     ddz = dt/dz
     
-    do k=1,iz-2
-     do j=1,iy-2
-      do i=1,ix-2
+    do k=1,iz-1
+     do j=1,iy-1
+      do i=1,ix-1
           fffx = 0.25* ( fx(i+1,j+1,k+1)+fx(i+1,j,k+1)-fx(i,j+1,k+1)-fx(i,j,k+1) &
                         +fx(i+1,j+1,k  )+fx(i+1,j,k  )-fx(i,j+1,k  )-fx(i,j,k  ) )
           fffy = 0.25* ( fy(i+1,j+1,k+1)-fy(i+1,j,k+1)+fy(i,j+1,k+1)-fy(i,j,k+1) &

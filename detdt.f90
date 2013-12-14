@@ -7,12 +7,12 @@ subroutine detdt(box)
     implicit none
     type(cell) :: box[cox,coy,coz,*]
 
-    double precision, allocatable :: v2(:,:,:)
+    double precision, allocatable :: v2(ix,iy,iz)
     double precision :: d, dtwav, dtdif, dt(cox,coy,coz)
     integer :: i,j,k
     double precision :: alp=0.01, etamax=1., vc=1000
     double precision :: jx,jy,jz,largest, eta
-    allocate(v2(ix,iy,iz))
+   
     
     d = min(box%con%dx,box%con%dy,box%con%dz) 
 
@@ -65,7 +65,6 @@ subroutine detdt(box)
     sync all
     box%con%dt = minval(dt)
 
-    deallocate(v2)
 end subroutine
 
 end module
