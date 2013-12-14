@@ -28,7 +28,7 @@ program main
     box%con%imy = this_image(box,2)
     box%con%imz = this_image(box,3)
     box%con%wid = 160.
-    box%con%dep = 25.
+    box%con%dep = 50.
     box%con%hig = 85.
     box%con%dx = box%con%wid/dble(nnx-1)
     box%con%dy = box%con%dep/dble(nny-1)
@@ -40,7 +40,7 @@ program main
     t = 0.
     tint = 5.
     tnxt = tint
-    tend = 80.
+    tend = 110.
     ns = 0
     nsout = 1e5
 
