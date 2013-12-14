@@ -25,7 +25,6 @@ end subroutine
 
 subroutine each1(u,h,d,fx,fy,fz,s,dx,dy,dz,dt)
     use defstruct
-    !$use omp_lib
     implicit none
     double precision :: u(ix,iy,iz),d(ix,iy,iz),h(ix,iy,iz)
     double precision :: fx(ix,iy,iz),fy(ix,iy,iz),fz(ix,iy,iz),s(ix,iy,iz)
@@ -50,7 +49,6 @@ subroutine each1(u,h,d,fx,fy,fz,s,dx,dy,dz,dt)
      end do
     end do
 
-    !$omp parallel do private(i,j,fffx,fffy,fffz,ss) 
     do k=1,iz-1
      do j=1,iy-1
       do i=1,ix-1
@@ -68,7 +66,6 @@ subroutine each1(u,h,d,fx,fy,fz,s,dx,dy,dz,dt)
       end do
      end do
     end do
-    !$omp end parallel do
 end subroutine
 
 subroutine lw2(box, d, fx, fy, fz, s)
@@ -95,7 +92,6 @@ end subroutine
 
 subroutine each2(box,d,fx,fy,fz,s,dx,dy,dz,dt)
     use defstruct
-    !$use omp_lib
     implicit none
     double precision :: box(ix,iy,iz),d(ix,iy,iz)
     double precision :: fx(ix,iy,iz),fy(ix,iy,iz),fz(ix,iy,iz),s(ix,iy,iz)
@@ -109,7 +105,6 @@ subroutine each2(box,d,fx,fy,fz,s,dx,dy,dz,dt)
     ddy = dt/dy
     ddz = dt/dz
     
-    !$omp parallel do private(i,j,fffx,fffy,fffz,ss) 
     do k=1,iz-2
      do j=1,iy-2
       do i=1,ix-2
@@ -125,26 +120,22 @@ subroutine each2(box,d,fx,fy,fz,s,dx,dy,dz,dt)
       end do
      end do
     end do
-    !$omp end parallel do
 
 end subroutine 
 
 subroutine artvis(box, d)
     use defstruct
-    !$use omp_lib
     implicit none
     type(cell) :: box, d
     double precision, allocatable :: kapx(:,:,:),kapy(:,:,:),kapz(:,:,:)
     allocate(kapx(ix,iy,iz),kapy(ix,iy,iz),kapz(ix,iy,iz))
     
-    !$omp parallel workshare
     kapx(2:ix,:,:) = box%con%q * abs(box%rovx(2:ix,:,:)/box%ro(2:ix,:,:) &
                                     - box%rovx(1:ix-1,:,:)/box%ro(1:ix-1,:,:))
     kapy(:,2:iy,:) = box%con%q * abs(box%rovy(:,2:iy,:)/box%ro(:,2:iy,:) &
                                     - box%rovy(:,1:iy-1,:)/box%ro(:,1:iy-1,:))
     kapz(:,:,2:iz) = box%con%q * abs(box%rovz(:,:,2:iz)/box%ro(:,:,2:iz) &
                                     - box%rovz(:,:,1:iz-1)/box%ro(:,:,1:iz-1)) 
-    !$omp end parallel workshare
 
     call eachav(box%ro, d%ro, kapx, kapy, kapz, box%con)
     call eachav(box%rovx, d%rovx, kapx, kapy, kapz, box%con)
@@ -161,7 +152,6 @@ end subroutine
 
 subroutine eachav(box,d,kapx,kapy,kapz,con)
     use defstruct
-    !$use omp_lib
     double precision :: box(ix,iy,iz),d(ix,iy,iz)
     double precision :: kapx(ix,iy,iz),kapy(ix,iy,iz),kapz(ix,iy,iz)
     type(constants) con
@@ -173,13 +163,10 @@ subroutine eachav(box,d,kapx,kapy,kapz,con)
     ddy = con%dt / con%dy
     ddz = con%dt / con%dz
     
-    !$omp parallel
-    !$omp workshare
     difx(2:ix,:,:) = box(2:ix,:,:) - box(1:ix-1,:,:)
     dify(:,2:iy,:) = box(:,2:iy,:) - box(:,1:iy-1,:)
     difz(:,:,2:iz) = box(:,:,2:iz) - box(:,:,1:iz-1)
-    !$omp end workshare
-    !$omp workshare
+
     box(3:ix-2,3:iy-2,3:iz-2) = box(3:ix-2,3:iy-2,3:iz-2) + d(3:ix-2,3:iy-2,3:iz-2) &
              + ddx * ( kapx(4:ix-1,3:iy-2,3:iz-2)*difx(4:ix-1,3:iy-2,3:iz-2) &
                      - kapx(3:ix-2,3:iy-2,3:iz-2)*difx(3:ix-2,3:iy-2,3:iz-2) ) &
@@ -187,8 +174,6 @@ subroutine eachav(box,d,kapx,kapy,kapz,con)
                      - kapy(3:ix-2,3:iy-2,3:iz-2)*dify(3:ix-2,3:iy-2,3:iz-2) ) &
              + ddz * ( kapz(3:ix-2,3:iy-2,4:iz-1)*difz(3:ix-2,3:iy-2,4:iz-1) &
                      - kapz(3:ix-2,3:iy-2,3:iz-2)*difz(3:ix-2,3:iy-2,3:iz-2) ) 
-    !$omp end workshare
-    !$omp end parallel 
     deallocate(difx,dify,difz)
 end subroutine 
 
@@ -203,7 +188,6 @@ subroutine flux(box, fx, fy, fz)
     double precision :: eta, ex, ey, ez
     double precision :: jx, jy, jz
 
-    !$omp parallel do private(i,j,roi,vx,vy,vz,bx,by,bz,pr,b2,h,jx,jy,jz,eta,ex,ey,ez)
     do k=2,iz-1
       do j=2,iy-1
         do i=2,ix-1
@@ -269,14 +253,12 @@ subroutine flux(box, fx, fy, fz)
         end do
       end do
     end do
-    !$omp end parallel do 
     
 
 end subroutine
 
 subroutine source(box, s)
     use defstruct
-    !$use omp_lib
     implicit none
     type(cell) :: box, s
     integer :: i
@@ -292,7 +274,6 @@ subroutine source(box, s)
         end if
     end if
 
-    !$omp parallel workshare
     s%ro = 0.
     s%bx = 0.
     s%by = 0.
@@ -302,7 +283,6 @@ subroutine source(box, s)
     forall(i=1:iz) s%rovz(:,:,i) = box%ro(:,:,i)*box%con%gz*fugou(i)
     s%e = box%rovx*box%con%gx + box%rovy*box%con%gy + box%rovz*box%con%gz
 
-    !$omp end parallel workshare
 end subroutine
 
 end module 

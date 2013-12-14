@@ -6,7 +6,6 @@ program main
     use pr
     use dt
     use st
-    !$use omp_lib
     implicit none
     
     type(cell) :: box[cox,coy,coz,*]
@@ -19,7 +18,6 @@ program main
     character*10 :: tmp
     integer :: mcont
 
-    call omp_set_num_threads(1)
     !allocate(box)
 
     call date_and_time(tmp,tmp,tmp,start)
