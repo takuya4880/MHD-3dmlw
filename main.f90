@@ -85,8 +85,12 @@ program main
                 end do
             end do
         end do 
-        if (product(flag)==1 .or. t>tend .or. box%con%dt<1.e-10) exit
-        
+        sync all
+        if (t>tend) exit
+        if (product(flag)==1 .or. box%con%dt<1.e-10) then
+            call outp(box,t)
+            exit
+        end if
     end do
 
 end program main
