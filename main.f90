@@ -62,7 +62,7 @@ program main
         sync all
         t = t + box%con%dt
         if (this_image()==1) print *,t,box%con%dt 
-        if (t>=tnxt then
+        if (t>=tnxt) then
             call outp(box,t)
             tnxt = tnxt + tint
         endif
