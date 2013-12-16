@@ -21,38 +21,39 @@ subroutine detdt(box)
     v2 = v2 + box%con%gam * box%pr / box%ro
     dtwav = box%con%a * d / sqrt(maxval(v2))
 
-    largest = 1.e-5
-    
-    do k=2,iz-1
-      do j=2,iy-1
-        do i=2,ix-1
-            jx = (box%bz(i,j+1,k)-box%bz(i,j-1,k))/(2.*box%con%dy) &
-                        -(box%by(i,j,k+1)-box%by(i,j,k-1))/(2.*box%con%dz)
-            jy = (box%bx(i,j,k+1)-box%bx(i,j,k-1))/(2.*box%con%dz) &
-                        -(box%bz(i+1,j,k)-box%bz(i-1,j,k))/(2.*box%con%dx)
-            jz = (box%by(i+1,j,k)-box%by(i-1,j,k))/(2.*box%con%dx) &
-                        -(box%bx(i,j+1,k)-box%bx(i,j-1,k))/(2.*box%con%dy)
+    !largest = 1.e-5
+   ! 
+    !do k=2,iz-1
+    !  do j=2,iy-1
+    !    do i=2,ix-1
+    !        jx = (box%bz(i,j+1,k)-box%bz(i,j-1,k))/(2.*box%con%dy) &
+    !                    -(box%by(i,j,k+1)-box%by(i,j,k-1))/(2.*box%con%dz)
+    !        jy = (box%bx(i,j,k+1)-box%bx(i,j,k-1))/(2.*box%con%dz) &
+    !                    -(box%bz(i+1,j,k)-box%bz(i-1,j,k))/(2.*box%con%dx)
+    !        jz = (box%by(i+1,j,k)-box%by(i-1,j,k))/(2.*box%con%dx) &
+    !                    -(box%bx(i,j+1,k)-box%bx(i,j-1,k))/(2.*box%con%dy)
+!
+    !        eta = sqrt((jx**2+jy**2+jz**2)*16.*atan(1.0))/box%ro(i,j,k)  !calculate vd
+    !        
+    !        if (eta<vc) then
+    !            eta = 0.
+    !        else 
+    !            eta = alp*(eta/vc-1.)**2
+    !            if (eta>etamax) then
+    !                eta = etamax
+    !            end if
+    !        end if
 
-            eta = sqrt((jx**2+jy**2+jz**2)*16.*atan(1.0))/box%ro(i,j,k)  !calculate vd
-            
-            if (eta<vc) then
-                eta = 0.
-            else 
-                eta = alp*(eta/vc-1.)**2
-                if (eta>etamax) then
-                    eta = etamax
-                end if
-            end if
+    !        if (eta>largest) then
+    !            largest = eta
+    !        end if
+    !    end do
+    !  end do
+    !end do
+    !dtdif = box%con%a * 0.5 * d**2/largest
 
-            if (eta>largest) then
-                largest = eta
-            end if
-        end do
-      end do
-    end do
-    dtdif = box%con%a * 0.5 * d**2/largest
-
-    box%con%dt = min(dtwav,dtdif)
+    !box%con%dt = min(dtwav,dtdif)
+    box%con%dt = dtwav
 
     sync all
     do i=1,cox

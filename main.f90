@@ -39,7 +39,7 @@ program main
     t = 0.
     tint = 5.
     tnxt = tint
-    tend = 110.
+    tend = 120.
 
     call initial(box, uboundary)
     sync all

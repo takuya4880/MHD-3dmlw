@@ -220,6 +220,9 @@ subroutine flux(box, fx, fy, fz)
                     eta = etamax
                 end if
             end if
+
+            eta = 0.
+
             ex = eta*jx + (-vy*bz+vz*by)
             ey = eta*jy + (-vz*bx+vx*bz)
             ez = eta*jz + (-vx*by+vy*bx)
