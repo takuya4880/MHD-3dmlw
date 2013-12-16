@@ -1,8 +1,8 @@
 module defstruct
     implicit none
-    integer,parameter :: nx=100
+    integer,parameter :: nx=50
     integer,parameter :: ny=40
-    integer,parameter :: nz=100
+    integer,parameter :: nz=50
     integer,parameter :: cox=7
     integer,parameter :: coy=3
     integer,parameter :: coz=6

@@ -78,7 +78,6 @@ subroutine initial(box, uboundary)
             phi(i)=0.
         else
             phi(i)=phicor
-            phi(i)=0.
         end if
     end do
 

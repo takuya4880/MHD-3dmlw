@@ -54,6 +54,7 @@ program main
     call pressure(box)
 
     do
+        if (t>70) tint=1.
         call detdt(box)    
         sync all
         call step(box)
