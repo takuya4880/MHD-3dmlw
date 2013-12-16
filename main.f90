@@ -48,7 +48,7 @@ program main
     call outpinit(box)
     if (mcont==1) then
         call readdata(box,t)
-        tnxt = t + tint
+        tnxt = t - mod(t,tint) + tint
     end if
     call outp(box,t)
     call pressure(box)
