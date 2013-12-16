@@ -62,8 +62,8 @@ program main
         call boundary(box, uboundary)
         sync all
         t = t + box%con%dt
-        if (this_image()==1) print *,t,box%con%dt 
         if (t>=tnxt) then
+            if (this_image()==1) print *,t,box%con%dt 
             call outp(box,t)
             tnxt = tnxt + tint
         endif
@@ -84,6 +84,7 @@ program main
         end do 
         sync all
         if (product(flag)==1 .or. box%con%dt<1.e-10) then
+            if (this_image()==1) print *,t,box%con%dt 
             call outp(box,t)
             exit
         end if
