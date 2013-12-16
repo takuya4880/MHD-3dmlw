@@ -76,7 +76,7 @@ subroutine outpinit(box)
     call dacdef1d(box%op%mf_y,'y.dac.'//cno,6,iy)
     write(box%op%mf_y) box%y
     call dacdef1d(box%op%mf_z,'z.dac.'//cno,6,iz)
-    write(box%op%mf_y) box%z
+    write(box%op%mf_z) box%z
     call dacputparamd(box%op%mf_params,'gm',box%con%gam)
 
     close(box%op%mf_x)
