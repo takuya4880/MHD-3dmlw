@@ -22,7 +22,7 @@ program main
     call date_and_time(tmp,tmp,tmp,start)
 
     mcont = 0
-    timelimit = 210 !: 210:3.5hours
+    timelimit = 60 !: 210:3.5hours
     box%con%imx = this_image(box,1)
     box%con%imy = this_image(box,2)
     box%con%imz = this_image(box,3)
@@ -36,7 +36,8 @@ program main
     box%con%q = 3.
     box%con%gam = 1.4
 
-    t = 0.
+    t = 0
+
     tint = 5.
     tnxt = tint
     tend = 120.
@@ -54,7 +55,7 @@ program main
     call pressure(box)
 
     do
-        if (t>70) tint=1.
+        if (t>80) tint=1.
         call detdt(box)    
         sync all
         call step(box)
