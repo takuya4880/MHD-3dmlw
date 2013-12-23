@@ -49,6 +49,7 @@ program main
     call outpinit(box)
     if (mcont==1) then
         call readdata(box,t)
+        if (t>80) tint=1.
         tnxt = t - mod(t,tint) + tint
     end if
     call outp(box,t)
