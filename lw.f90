@@ -274,6 +274,9 @@ subroutine source(box, s)
             fugou(1:marg) = -1.
         end if
     end if
+    if(box%con%imz==coz) then
+        fugou(iz-2*marg:iz) = 0.
+    end if 
 
     s%ro = 0.
     s%bx = 0.

@@ -22,7 +22,7 @@ program main
     call date_and_time(tmp,tmp,tmp,start)
 
     mcont = 0
-    timelimit = 60 !: 210:3.5hours
+    timelimit = 210 !: 210:3.5hours
     box%con%imx = this_image(box,1)
     box%con%imy = this_image(box,2)
     box%con%imz = this_image(box,3)
@@ -37,7 +37,6 @@ program main
     box%con%gam = 1.4
 
     t = 0
-
     tint = 5.
     tnxt = tint
     tend = 120.
@@ -46,17 +45,18 @@ program main
     sync all
     call boundary(box, uboundary)
     sync all
-    call outpinit(box)
+    call outpinit_fl(box)
     if (mcont==1) then
         call readdata(box,t)
-        if (t>80) tint=1.
+        if (t>79) tint=1.
         tnxt = t - mod(t,tint) + tint
+    else
+        call outp_fl(box,t)
     end if
-    call outp(box,t)
     call pressure(box)
 
     do
-        if (t>80) tint=1.
+        if (t>79) tint=1.
         call detdt(box)    
         sync all
         call step(box)
@@ -66,7 +66,7 @@ program main
         t = t + box%con%dt
         if (t>=tnxt) then
             if (this_image()==1) print *,t,box%con%dt 
-            call outp(box,t)
+            call outp_fl(box,t)
             tnxt = tnxt + tint
         endif
         if (t>tend) exit
@@ -87,7 +87,8 @@ program main
         sync all
         if (product(flag)==1 .or. box%con%dt<1.e-10) then
             if (this_image()==1) print *,t,box%con%dt 
-            call outp(box,t)
+            call outpinit_db_in(box)
+            call outp_db(box,t)
             exit
         end if
     end do
