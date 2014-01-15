@@ -117,19 +117,15 @@ subroutine outpinit_db_in(box)
     mpe = this_image()-1
     write(cno,'(i4.4)') mpe
 
-    box%op%mf_params=109
-    box%op%mf_t=110
-    box%op%mf_x=111
-    box%op%mf_y=112
-    box%op%mf_z=113
-    box%op%mf_ro=120
-    box%op%mf_pr=121
-    box%op%mf_vx=122
-    box%op%mf_vy=123
-    box%op%mf_vz=124
-    box%op%mf_bx=125
-    box%op%mf_by=126
-    box%op%mf_bz=127
+    close(box%op%mf_ro)
+    close(box%op%mf_pr)
+    close(box%op%mf_vx)
+    close(box%op%mf_vy)
+    close(box%op%mf_vz)
+    close(box%op%mf_bx)
+    close(box%op%mf_by)
+    close(box%op%mf_bz)
+    close(box%op%mf_t)
     
     call dacdefparam(box%op%mf_params,'in/params.txt.'//cno)
     call dacdef0s(box%op%mf_t,'in/t.dac.'//cno,6)
