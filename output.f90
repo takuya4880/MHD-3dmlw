@@ -224,11 +224,11 @@ subroutine outpinit_fl(box)
     
 
     call dacdef1d(box%op%mf_x,'x.dac.'//cno,5,ix)
-    write(box%op%mf_x) box%x
+    write(box%op%mf_x) real(box%x)
     call dacdef1d(box%op%mf_y,'y.dac.'//cno,5,iy)
-    write(box%op%mf_y) box%y
+    write(box%op%mf_y) real(box%y)
     call dacdef1d(box%op%mf_z,'z.dac.'//cno,5,iz)
-    write(box%op%mf_z) box%z
+    write(box%op%mf_z) real(box%z)
     call dacputparamd(box%op%mf_params,'gm',box%con%gam)
 
     close(box%op%mf_x)
@@ -303,8 +303,6 @@ subroutine readdata(box,t)
     close(box%op%mfi_bx) 
     close(box%op%mfi_by)
     close(box%op%mfi_bz)
-
-    end do
 
 end subroutine
 

@@ -48,7 +48,7 @@ program main
     call outpinit_fl(box)
     if (mcont==1) then
         call readdata(box,t)
-        if (t>79) tint=1.
+        if (t>69) tint=1.
         tnxt = t - mod(t,tint) + tint
     else
         call outp_fl(box,t)
@@ -56,7 +56,7 @@ program main
     call pressure(box)
 
     do
-        if (t>79) tint=1.
+        if (t>69) tint=1.
         call detdt(box)    
         sync all
         call step(box)
