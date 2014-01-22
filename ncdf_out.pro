@@ -1,4 +1,4 @@
-offset=60
+offset=0
 
 dims=size(ro)
 ix=dims[1]
@@ -25,6 +25,8 @@ vxid = ncdf_vardef(id, 'vx', [xid,yid,zid], /float)
 vyid = ncdf_vardef(id, 'vy', [xid,yid,zid], /float)
 vzid = ncdf_vardef(id, 'vz', [xid,yid,zid], /float)
 teid = ncdf_vardef(id, 'te', [xid,yid,zid], /float)
+dbid = ncdf_vardef(id, 'divb', [xid,yid,zid], /float)
+cdid = ncdf_vardef(id, 'cden', [xid,yid,zid], /float)
 cxid = ncdf_vardef(id, 'x', [xid], /float)
 cyid = ncdf_vardef(id, 'y', [yid], /float)
 czid = ncdf_vardef(id, 'z', [zid], /float)
@@ -40,6 +42,8 @@ ncdf_varput, id, vxid, vx[*,*,*,ns]
 ncdf_varput, id, vyid, vy[*,*,*,ns]
 ncdf_varput, id, vzid, vz[*,*,*,ns]
 ncdf_varput, id, teid, te[*,*,*,ns]
+ncdf_varput, id, teid, divb[*,*,*,ns]
+ncdf_varput, id, teid, cden[*,*,*,ns]
 ncdf_varput, id, cxid, x
 ncdf_varput, id, cyid, y
 ncdf_varput, id, czid, z
