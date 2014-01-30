@@ -7,6 +7,9 @@ subroutine outp(box,t)
     implicit none
     type(cell) :: box
     double precision :: t
+    integer :: i
+    logical :: ex
+    character*10 d,di
 
     write(box%op%mf_t) t
     write(box%op%mf_ro) box%ro
@@ -18,7 +21,63 @@ subroutine outp(box,t)
     write(box%op%mf_by) box%by
     write(box%op%mf_bz) box%bz
 
+    close(box%op%mf_t) 
+    close(box%op%mf_ro) 
+    close(box%op%mf_pr)
+    close(box%op%mf_vx)
+    close(box%op%mf_vy)
+    close(box%op%mf_vz)
+    close(box%op%mf_bx)
+    close(box%op%mf_by)
+    close(box%op%mf_bz)
+
+
+    do i=1,999
+        write(di,'(i3.3)') i
+        d='out'//di
+        inquire(file=d,exist=ex)
+        if(ex .eqv. .FALSE.) then
+            call system('mv in '//d)
+            exit
+        end if
+    end do
+
+    call outputinit(box)
+
 end subroutine 
+
+subroutine outp_end(box,t)
+    use defstruct
+    use cansio
+    implicit none
+    type(cell) :: box
+    double precision :: t
+    integer :: i
+    logical :: ex
+    character*10 d,di
+
+    write(box%op%mf_t) t
+    write(box%op%mf_ro) box%ro
+    write(box%op%mf_pr) box%pr
+    write(box%op%mf_vx) box%rovx/box%ro
+    write(box%op%mf_vy) box%rovy/box%ro
+    write(box%op%mf_vz) box%rovz/box%ro
+    write(box%op%mf_bx) box%bx
+    write(box%op%mf_by) box%by
+    write(box%op%mf_bz) box%bz
+
+    close(box%op%mf_t) 
+    close(box%op%mf_ro) 
+    close(box%op%mf_pr)
+    close(box%op%mf_vx)
+    close(box%op%mf_vy)
+    close(box%op%mf_vz)
+    close(box%op%mf_bx)
+    close(box%op%mf_by)
+    close(box%op%mf_bz)
+
+end subroutine 
+
 
 subroutine outpinit(box)
     use defstruct
@@ -44,6 +103,9 @@ subroutine outpinit(box)
     box%op%mf_bx=25
     box%op%mf_by=26
     box%op%mf_bz=27
+
+    call system('rm -r in')
+    call system('mkdir in')
     
     call dacdefparam(box%op%mf_params,'in/params.txt.'//cno)
     call dacdef0s(box%op%mf_t,'in/t.dac.'//cno,6)

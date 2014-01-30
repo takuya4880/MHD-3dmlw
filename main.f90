@@ -45,13 +45,13 @@ program main
     sync all
     call boundary(box, uboundary)
     sync all
-    call outpinit_fl(box)
+    call outpinit(box)
     if (mcont==1) then
         call readdata(box,t)
         if (t>69) tint=1.
         tnxt = t - mod(t,tint) + tint
     else
-        call outp_fl(box,t)
+        call outp(box,t)
     end if
     call pressure(box)
 
@@ -66,7 +66,7 @@ program main
         t = t + box%con%dt
         if (t>=tnxt) then
             if (this_image()==1) print *,t,box%con%dt 
-            call outp_fl(box,t)
+            call outp(box,t)
             tnxt = tnxt + tint
         endif
         if (t>tend) exit
@@ -87,8 +87,7 @@ program main
         sync all
         if (product(flag)==1 .or. box%con%dt<1.e-10) then
             if (this_image()==1) print *,t,box%con%dt 
-            call outpinit_db_in(box)
-            call outp_db(box,t)
+            call outp_end(box,t)
             exit
         end if
     end do
