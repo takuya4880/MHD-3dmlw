@@ -31,18 +31,22 @@ subroutine outp(box,t)
     close(box%op%mf_by)
     close(box%op%mf_bz)
 
+    sync all
+    if (this_image()==1) then 
+        do i=1,999
+            write(di,'(i4.4)') i
+            d='out'//di
+            inquire(file=d,exist=ex)
+            if(ex .eqv. .FALSE.) then
+                call system('mv in '//d)
+                call system('mkdir in')
+                exit
+            end if
+        end do
+    end if
+    sync all
 
-    do i=1,999
-        write(di,'(i3.3)') i
-        d='out'//di
-        inquire(file=d,exist=ex)
-        if(ex .eqv. .FALSE.) then
-            call system('mv in '//d)
-            exit
-        end if
-    end do
-
-    call outputinit(box)
+    call outpinit(box)
 
 end subroutine 
 
@@ -52,9 +56,6 @@ subroutine outp_end(box,t)
     implicit none
     type(cell) :: box
     double precision :: t
-    integer :: i
-    logical :: ex
-    character*10 d,di
 
     write(box%op%mf_t) t
     write(box%op%mf_ro) box%ro
@@ -104,9 +105,6 @@ subroutine outpinit(box)
     box%op%mf_by=26
     box%op%mf_bz=27
 
-    call system('rm -r in')
-    call system('mkdir in')
-    
     call dacdefparam(box%op%mf_params,'in/params.txt.'//cno)
     call dacdef0s(box%op%mf_t,'in/t.dac.'//cno,6)
     call dacdef3s(box%op%mf_ro,'in/ro.dac.'//cno,6,ix,iy,iz)
@@ -133,11 +131,11 @@ subroutine outpinit(box)
     call dacputparami(box%op%mf_params,'kpe',box%con%imz-1)
     
 
-    call dacdef1d(box%op%mf_x,'x.dac.'//cno,6,ix)
+    call dacdef1d(box%op%mf_x,'in/x.dac.'//cno,6,ix)
     write(box%op%mf_x) box%x
-    call dacdef1d(box%op%mf_y,'y.dac.'//cno,6,iy)
+    call dacdef1d(box%op%mf_y,'in/y.dac.'//cno,6,iy)
     write(box%op%mf_y) box%y
-    call dacdef1d(box%op%mf_z,'z.dac.'//cno,6,iz)
+    call dacdef1d(box%op%mf_z,'in/z.dac.'//cno,6,iz)
     write(box%op%mf_z) box%z
     call dacputparamd(box%op%mf_params,'gm',box%con%gam)
 
