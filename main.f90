@@ -45,7 +45,6 @@ program main
     sync all
     call boundary(box, uboundary)
     sync all
-    call outpinit(box)
     if (mcont==1) then
         call readdata(box,t)
         if (t>69) tint=1.

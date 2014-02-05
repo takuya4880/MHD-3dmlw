@@ -11,6 +11,8 @@ subroutine outp(box,t)
     logical :: ex
     character*10 d,di
 
+    call outpinit(box)
+
     write(box%op%mf_t) t
     write(box%op%mf_ro) box%ro
     write(box%op%mf_pr) box%pr
@@ -32,6 +34,7 @@ subroutine outp(box,t)
     close(box%op%mf_bz)
 
     sync all
+    i=this_image()
     if (this_image()==1) then 
         do i=1,999
             write(di,'(i4.4)') i
@@ -46,7 +49,6 @@ subroutine outp(box,t)
     end if
     sync all
 
-    call outpinit(box)
 
 end subroutine 
 
@@ -56,6 +58,8 @@ subroutine outp_end(box,t)
     implicit none
     type(cell) :: box
     double precision :: t
+
+    call outpinit(box)
 
     write(box%op%mf_t) t
     write(box%op%mf_ro) box%ro
