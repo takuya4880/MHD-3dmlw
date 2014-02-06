@@ -8,6 +8,8 @@ subroutine outp(box,t)
     type(cell) :: box
     double precision :: t
 
+    call outpinit(box)
+
     write(box%op%mf_t) t
     write(box%op%mf_ro) box%ro
     write(box%op%mf_pr) box%pr
