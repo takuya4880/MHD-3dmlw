@@ -87,7 +87,8 @@ program main
         sync all
         if (product(flag)==1 .or. box%con%dt<1.e-10) then
             if (this_image()==1) print *,t,box%con%dt 
-            call outp_end(box,t)
+            call outpinit_end(box)
+            call outp(box,t)
             exit
         end if
     end do

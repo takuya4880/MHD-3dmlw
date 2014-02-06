@@ -7,9 +7,6 @@ subroutine outp(box,t)
     implicit none
     type(cell) :: box
     double precision :: t
-    integer :: i
-    logical :: ex
-    character*10 d,di
 
     write(box%op%mf_t) t
     write(box%op%mf_ro) box%ro
@@ -21,64 +18,7 @@ subroutine outp(box,t)
     write(box%op%mf_by) box%by
     write(box%op%mf_bz) box%bz
 
-    close(box%op%mf_t) 
-    close(box%op%mf_ro) 
-    close(box%op%mf_pr)
-    close(box%op%mf_vx)
-    close(box%op%mf_vy)
-    close(box%op%mf_vz)
-    close(box%op%mf_bx)
-    close(box%op%mf_by)
-    close(box%op%mf_bz)
-
-    sync all
-    if (this_image()==1) then 
-        do i=1,999
-            write(di,'(i4.4)') i
-            d='out'//di
-            inquire(file=d,exist=ex)
-            if(ex .eqv. .FALSE.) then
-                call system('mv in '//d)
-                call system('mkdir in')
-                exit
-            end if
-        end do
-    end if
-    sync all
-
-    call outpinit(box)
-
 end subroutine 
-
-subroutine outp_end(box,t)
-    use defstruct
-    use cansio
-    implicit none
-    type(cell) :: box
-    double precision :: t
-
-    write(box%op%mf_t) t
-    write(box%op%mf_ro) box%ro
-    write(box%op%mf_pr) box%pr
-    write(box%op%mf_vx) box%rovx/box%ro
-    write(box%op%mf_vy) box%rovy/box%ro
-    write(box%op%mf_vz) box%rovz/box%ro
-    write(box%op%mf_bx) box%bx
-    write(box%op%mf_by) box%by
-    write(box%op%mf_bz) box%bz
-
-    close(box%op%mf_t) 
-    close(box%op%mf_ro) 
-    close(box%op%mf_pr)
-    close(box%op%mf_vx)
-    close(box%op%mf_vy)
-    close(box%op%mf_vz)
-    close(box%op%mf_bx)
-    close(box%op%mf_by)
-    close(box%op%mf_bz)
-
-end subroutine 
-
 
 subroutine outpinit(box)
     use defstruct
@@ -90,6 +30,10 @@ subroutine outpinit(box)
     character :: cno*4
     mpe = this_image()-1
     write(cno,'(i4.4)') mpe
+    integer :: i
+    logical :: ex
+    character*4 di
+    character*7 d
 
     box%op%mf_params=9
     box%op%mf_t=10
@@ -104,6 +48,85 @@ subroutine outpinit(box)
     box%op%mf_bx=25
     box%op%mf_by=26
     box%op%mf_bz=27
+
+    if (this_image()==1) then 
+        do i=0,999
+            write(di,'(i4.4)') i
+            dir='out'//di
+            inquire(file=dir,exist=ex)
+            if(ex .eqv. .FALSE.) then
+                call system('mkdir '//dir)
+                exit
+            end if
+        end do
+    end if
+    sync all
+
+    call dacdefparam(box%op%mf_params,dir//'/params.txt.'//cno)
+    call dacdef0s(box%op%mf_t,dir//'/t.dac.'//cno,6)
+    call dacdef3s(box%op%mf_ro,dir//'/ro.dac.'//cno,6,ix,iy,iz)
+    call dacdef3s(box%op%mf_pr,dir//'/pr.dac.'//cno,6,ix,iy,iz)
+    call dacdef3s(box%op%mf_vx,dir//'/vx.dac.'//cno,6,ix,iy,iz)
+    call dacdef3s(box%op%mf_vy,dir//'/vy.dac.'//cno,6,ix,iy,iz)
+    call dacdef3s(box%op%mf_vz,dir//'/vz.dac.'//cno,6,ix,iy,iz)
+    call dacdef3s(box%op%mf_bx,dir//'/bx.dac.'//cno,6,ix,iy,iz)
+    call dacdef3s(box%op%mf_by,dir//'/by.dac.'//cno,6,ix,iy,iz)
+    call dacdef3s(box%op%mf_bz,dir//'/bz.dac.'//cno,6,ix,iy,iz)
+
+    call dacputparami(box%op%mf_params,'ix',ix)
+    call dacputparami(box%op%mf_params,'jx',iy)
+    call dacputparami(box%op%mf_params,'kx',iz)
+    call dacputparami(box%op%mf_params,'margin',marg)
+    call dacputparami(box%op%mf_params,'mpi',1)
+    call dacputparami(box%op%mf_params,'mpex',cox*coy*coz)
+    call dacputparami(box%op%mf_params,'mpe',mpe)
+    call dacputparami(box%op%mf_params,'ipex',cox)
+    call dacputparami(box%op%mf_params,'ipe',box%con%imx-1)
+    call dacputparami(box%op%mf_params,'jpex',coy)
+    call dacputparami(box%op%mf_params,'jpe',box%con%imy-1)
+    call dacputparami(box%op%mf_params,'kpex',coz)
+    call dacputparami(box%op%mf_params,'kpe',box%con%imz-1)
+    
+
+    call dacdef1d(box%op%mf_x,dir//'x.dac.'//cno,6,ix)
+    write(box%op%mf_x) box%x
+    call dacdef1d(box%op%mf_y,dir//'y.dac.'//cno,6,iy)
+    write(box%op%mf_y) box%y
+    call dacdef1d(box%op%mf_z,dir//'z.dac.'//cno,6,iz)
+    write(box%op%mf_z) box%z
+    call dacputparamd(box%op%mf_params,'gm',box%con%gam)
+
+    close(box%op%mf_x)
+    close(box%op%mf_y)
+    close(box%op%mf_z)
+    close(box%op%mf_params)
+     
+end subroutine
+
+subroutine outpinit_end(box)
+    use defstruct
+    use cansio
+    implicit none
+    type (cell) :: box
+    
+    integer :: mpe
+    character :: cno*4
+    mpe = this_image()-1
+    write(cno,'(i4.4)') mpe
+    
+    box%op%mf_params=39
+    box%op%mf_t=40
+    box%op%mf_x=41
+    box%op%mf_y=42
+    box%op%mf_z=43
+    box%op%mf_ro=50
+    box%op%mf_pr=51
+    box%op%mf_vx=52
+    box%op%mf_vy=53
+    box%op%mf_vz=54
+    box%op%mf_bx=55
+    box%op%mf_by=56
+    box%op%mf_bz=57
 
     call dacdefparam(box%op%mf_params,'in/params.txt.'//cno)
     call dacdef0s(box%op%mf_t,'in/t.dac.'//cno,6)
@@ -133,9 +156,9 @@ subroutine outpinit(box)
 
     call dacdef1d(box%op%mf_x,'in/x.dac.'//cno,6,ix)
     write(box%op%mf_x) box%x
-    call dacdef1d(box%op%mf_y,'in/y.dac.'//cno,6,iy)
+    call dacdef1d(box%op%mf_y,'y.dac.'//cno,6,iy)
     write(box%op%mf_y) box%y
-    call dacdef1d(box%op%mf_z,'in/z.dac.'//cno,6,iz)
+    call dacdef1d(box%op%mf_z,'z.dac.'//cno,6,iz)
     write(box%op%mf_z) box%z
     call dacputparamd(box%op%mf_params,'gm',box%con%gam)
 
@@ -145,6 +168,7 @@ subroutine outpinit(box)
     close(box%op%mf_params)
      
 end subroutine
+
 
 subroutine readdata(box,t)
     use defstruct
