@@ -30,12 +30,12 @@ subroutine outpinit(box)
     
     integer :: mpe
     character :: cno*4
-    mpe = this_image()-1
-    write(cno,'(i4.4)') mpe
     integer :: i
     logical :: ex
     character*4 di
-    character*7 d
+    character*7 dir
+    mpe = this_image()-1
+    write(cno,'(i4.4)') mpe
 
     box%op%mf_params=9
     box%op%mf_t=10
@@ -90,11 +90,11 @@ subroutine outpinit(box)
     call dacputparami(box%op%mf_params,'kpe',box%con%imz-1)
     
 
-    call dacdef1d(box%op%mf_x,dir//'x.dac.'//cno,6,ix)
+    call dacdef1d(box%op%mf_x,dir//'/x.dac.'//cno,6,ix)
     write(box%op%mf_x) box%x
-    call dacdef1d(box%op%mf_y,dir//'y.dac.'//cno,6,iy)
+    call dacdef1d(box%op%mf_y,dir//'/y.dac.'//cno,6,iy)
     write(box%op%mf_y) box%y
-    call dacdef1d(box%op%mf_z,dir//'z.dac.'//cno,6,iz)
+    call dacdef1d(box%op%mf_z,dir//'/z.dac.'//cno,6,iz)
     write(box%op%mf_z) box%z
     call dacputparamd(box%op%mf_params,'gm',box%con%gam)
 
@@ -158,9 +158,9 @@ subroutine outpinit_end(box)
 
     call dacdef1d(box%op%mf_x,'in/x.dac.'//cno,6,ix)
     write(box%op%mf_x) box%x
-    call dacdef1d(box%op%mf_y,'y.dac.'//cno,6,iy)
+    call dacdef1d(box%op%mf_y,'in/y.dac.'//cno,6,iy)
     write(box%op%mf_y) box%y
-    call dacdef1d(box%op%mf_z,'z.dac.'//cno,6,iz)
+    call dacdef1d(box%op%mf_z,'in/z.dac.'//cno,6,iz)
     write(box%op%mf_z) box%z
     call dacputparamd(box%op%mf_params,'gm',box%con%gam)
 
