@@ -8,8 +8,6 @@ subroutine outp(box,t)
     type(cell) :: box
     double precision :: t
 
-    call outpinit(box)
-
     write(box%op%mf_t) t
     write(box%op%mf_ro) box%ro
     write(box%op%mf_pr) box%pr
@@ -32,13 +30,14 @@ subroutine outpinit(box)
     character :: cno*4
     integer :: i
     logical :: ex
-    character*4 di
-    character*7 dir
+    character :: di*4
+    character :: dir*10
     mpe = this_image()-1
     write(cno,'(i4.4)') mpe
 
+
     box%op%mf_params=9
-    box%op%mf_t=10
+    box%op%mf_t=15
     box%op%mf_x=11
     box%op%mf_y=12
     box%op%mf_z=13
@@ -51,17 +50,16 @@ subroutine outpinit(box)
     box%op%mf_by=26
     box%op%mf_bz=27
 
-    if (this_image()==1) then 
-        do i=0,999
-            write(di,'(i4.4)') i
-            dir='out'//di
-            inquire(file=dir,exist=ex)
-            if(ex .eqv. .FALSE.) then
-                call system('mkdir '//dir)
-                exit
-            end if
-        end do
-    end if
+    do i=0,999
+        write(di,'(i4.4)') i
+        dir='result'//di
+        inquire(file=dir,exist=ex)
+        if(ex .eqv. .FALSE.) then
+            exit
+        end if
+    end do
+    sync all
+    if (this_image()==1) call system('mkdir '//dir)
     sync all
 
     call dacdefparam(box%op%mf_params,dir//'/params.txt.'//cno)
@@ -129,6 +127,16 @@ subroutine outpinit_end(box)
     box%op%mf_bx=55
     box%op%mf_by=56
     box%op%mf_bz=57
+
+    close(box%op%mfi_t)
+    close(box%op%mfi_ro) 
+    close(box%op%mfi_pr)
+    close(box%op%mfi_vx)
+    close(box%op%mfi_vy) 
+    close(box%op%mfi_vz)
+    close(box%op%mfi_bx) 
+    close(box%op%mfi_by)
+    close(box%op%mfi_bz)
 
     call dacdefparam(box%op%mf_params,'in/params.txt.'//cno)
     call dacdef0s(box%op%mf_t,'in/t.dac.'//cno,6)
@@ -227,15 +235,15 @@ subroutine readdata(box,t)
             + box%pr/(box%con%gam-1.) &
             + 0.5*(box%bx**2 + box%by**2 + box%bz**2)
 
-    close(box%op%mfi_t)
-    close(box%op%mfi_ro) 
-    close(box%op%mfi_pr)
-    close(box%op%mfi_vx)
-    close(box%op%mfi_vy) 
-    close(box%op%mfi_vz)
-    close(box%op%mfi_bx) 
-    close(box%op%mfi_by)
-    close(box%op%mfi_bz)
+    !close(box%op%mfi_t)
+    !close(box%op%mfi_ro) 
+    !close(box%op%mfi_pr)
+    !close(box%op%mfi_vx)
+    !close(box%op%mfi_vy) 
+    !close(box%op%mfi_vz)
+    !close(box%op%mfi_bx) 
+    !close(box%op%mfi_by)
+    !close(box%op%mfi_bz)
 
 end subroutine
 
